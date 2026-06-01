@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>О языках | Русский / Меллстройный / USB</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            background: #f5f7fb;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            min-height: 100vh;
+            padding: 2rem 1rem;
+        }
+        .container {
+            max-width: 900px;
+            width: 100%;
+            margin: 0 auto;
+            background: white;
+            border-radius: 2rem;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+            padding: 2rem;
+            position: relative;
+            z-index: 2;
+        }
+        h1 {
+            font-size: 1.8rem;
+            font-weight: 600;
+            color: #1e293b;
+            text-align: center;
+            margin-bottom: 0.5rem;
+        }
+        .badge {
+            text-align: center;
+            margin-bottom: 2rem;
+            color: #64748b;
+            font-size: 0.85rem;
+        }
+        .lang-card {
+            background: #f8fafc;
+            border-radius: 1.5rem;
+            padding: 1.5rem;
+            margin-bottom: 1.8rem;
+            border: 1px solid #e2e8f0;
+        }
+        .lang-title {
+            font-size: 1.4rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+        .lang-desc {
+            color: #334155;
+            line-height: 1.5;
+            margin-bottom: 1rem;
+        }
+        .rule-list {
+            list-style: none;
+            margin-top: 0.75rem;
+        }
+        .rule-list li {
+            padding: 0.4rem 0;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        .rule-example {
+            font-family: monospace;
+            background: #eef2ff;
+            padding: 0.2rem 0.5rem;
+            border-radius: 0.5rem;
+            font-size: 0.85rem;
+            color: #1e40af;
+        }
+        .exception {
+            background: #fef9e3;
+            border-left: 4px solid #eab308;
+            padding: 0.75rem;
+            border-radius: 0.75rem;
+            margin-top: 0.75rem;
+            font-size: 0.9rem;
+        }
+        .footer {
+            margin-top: 2rem;
+            text-align: center;
+            font-size: 0.8rem;
+            color: #6c757d;
+            border-top: 1px solid #e2e8f0;
+            padding-top: 1.5rem;
+        }
+        .back-link {
+            display: inline-block;
+            margin-top: 1rem;
+            background: #f1f5f9;
+            padding: 0.5rem 1.2rem;
+            border-radius: 2rem;
+            color: #1e293b;
+            text-decoration: none;
+            font-weight: 500;
+            transition: 0.2s;
+        }
+        .back-link:hover {
+            background: #e2e8f0;
+        }
+        @media (max-width: 640px) {
+            .container {
+                padding: 1.2rem;
+            }
+            .lang-title {
+                font-size: 1.2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>О языках переводчика</h1>
+    <div class="badge">Русский, Меллстройный, USB</div>
+
+    <!-- Русский -->
+    <div class="lang-card">
+        <div class="lang-title">Русский язык</div>
+        <div class="lang-desc">
+            Исходный язык. Вы пишете на обычном русском, а программа преобразует его в меллстройный или USB.
+        </div>
+    </div>
+
+    <!-- Меллстройный -->
+    <div class="lang-card">
+        <div class="lang-title">Меллстройный язык</div>
+        <div class="lang-desc">
+            Вымышленный язык с суффиксами и исключениями. Перевод состоит из двух этапов:
+        </div>
+        <ul class="rule-list">
+            <li><strong>1. Исключения</strong> – фиксированные замены (например, <span class="rule-example">училка → Учительность</span>, <span class="rule-example">нормально → ну нормально не ну еще посидим еще посидим</span>, <span class="rule-example">шприц → элджеевка</span>).</li>
+            <li><strong>2. Общее правило</strong> – если исключения нет, слово преобразуется по окончанию:
+                <ul style="margin-top: 0.5rem; margin-left: 1.5rem;">
+                    <li>оканчивается на <strong>а</strong> → заменяем на <strong>оность</strong> (попа → попоность)</li>
+                    <li>оканчивается на <strong>я</strong> → заменяем на <strong>ёность</strong> (земля → землёность)</li>
+                    <li>оканчивается на <strong>о</strong> → заменяем на <strong>ость</strong> (окно → окность)</li>
+                    <li>оканчивается на <strong>е</strong> → заменяем на <strong>есть</strong> (море → моресть)</li>
+                    <li>в остальных случаях добавляется <strong>ность</strong> (стол → столность)</li>
+                </ul>
+            </li>
+        </ul>
+        <div class="exception">
+            Важно: Слова-мусор (бессмысленные звуки вроде «ахахаха», «прпосто», «ололо») не переводятся и остаются как есть.
+        </div>
+    </div>
+
+    <!-- USB язык -->
+    <div class="lang-card">
+        <div class="lang-title">USB язык</div>
+        <div class="lang-desc">
+            USB — это сокращённый латинский вариант русских слов. Используется для быстрого ввода или для совместимости.
+        </div>
+        <ul class="rule-list">
+            <li><strong>Приоритет — словарь исключений</strong><br> <span class="rule-example">училка → UCHILKE</span>, <span class="rule-example">спасибо → SPS</span>, <span class="rule-example">нормально → NORM</span>.</li>
+            <li><strong>Если исключения нет</strong> – выполняется транслитерация (побуквенная замена кириллицы на латиницу):<br> <span class="rule-example">привет → privet</span>, <span class="rule-example">кот → kot</span>.</li>
+        </ul>
+        <div class="exception">
+            Обратный перевод с USB на русский работает аналогично: сначала ищется точное совпадение в словаре (например, NORM → «нормально»), затем — обратная транслитерация.
+        </div>
+    </div>
+
+    <!-- Взаимодействие языков -->
+    <div class="lang-card">
+        <div class="lang-title">Перевод между языками</div>
+        <div class="lang-desc">
+            В переводчике доступны все три языка. Вы можете выбрать любую пару:
+        </div>
+        <ul class="rule-list">
+            <li>Русский ↔ Меллстройный – прямой перевод через правила и исключения.</li>
+            <li>Русский ↔ USB – словарь + транслитерация.</li>
+            <li>Меллстройный ↔ USB – сначала слово переводится в русский, затем в целевой язык (через русский как промежуточный).</li>
+        </ul>
+    </div>
+
+    <!-- Как пользоваться -->
+    <div class="lang-card">
+        <div class="lang-title">Как пользоваться переводчиком</div>
+        <ul class="rule-list">
+            <li>Автоматический перевод при вводе (задержка 0.25 сек).</li>
+            <li>Кнопка ⇄ меняет языки местами и переносит текст.</li>
+            <li>Нельзя выбрать одинаковые языки – второй язык сменится автоматически.</li>
+        </ul>
+    </div>
+
+    <div class="footer">
+        <a href="index.html" class="back-link">← Вернуться к переводчику</a>
+    </div>
+</div>
+</body>
+</html>
