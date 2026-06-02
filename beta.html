@@ -644,52 +644,56 @@
         outputArea.innerText = '';
     });
 
-    // === НАСТРОЙКИ: обычный клик — обычное меню, долгое нажатие — секретное ===
+    // === ИСПРАВЛЕННАЯ ЛОГИКА: обычный клик — настройки, долгое нажатие — секретное меню ===
     const modal = document.getElementById('settingsModal');
     const settingsIconElem = document.getElementById('settingsIcon');
     const closeModalBtn = document.getElementById('closeModalBtn');
     const secretMenu = document.getElementById('secretMenu');
-    
-    let longPressActive = false;
-    let longPressTimerId = null;
 
-    function openSettingsModal() {
-        if (!longPressActive) {
+    let longPressTimer = null;
+    let isLongPress = false;
+
+    function openNormalSettings() {
+        if (!isLongPress) {
             modal.classList.add('open');
         }
     }
 
     function startLongPress(e) {
-        // предотвращаем случайное открытие при долгом нажатии
-        longPressActive = false;
-        longPressTimerId = setTimeout(() => {
-            longPressActive = true;
-            // Открываем секретное меню (показываем)
+        isLongPress = false;
+        longPressTimer = setTimeout(() => {
+            isLongPress = true;
             secretMenu.classList.add('show');
-            longPressTimerId = null;
+            longPressTimer = null;
         }, 500);
     }
 
     function cancelLongPress(e) {
-        if (longPressTimerId) {
-            clearTimeout(longPressTimerId);
-            longPressTimerId = null;
+        if (longPressTimer) {
+            clearTimeout(longPressTimer);
+            longPressTimer = null;
         }
-        if (!longPressActive) {
-            openSettingsModal();
+        // Если долгого нажатия не было — открываем обычные настройки
+        if (!isLongPress) {
+            openNormalSettings();
         }
-        // Сбрасываем флаг после клика, чтобы следующий клик работал
-        setTimeout(() => { longPressActive = false; }, 100);
+        // Сброс флага через небольшую задержку, чтобы не влиять на следующий клик
+        setTimeout(() => {
+            isLongPress = false;
+        }, 100);
     }
 
-    // Отключаем любые hover-эффекты, открывающие модалку
+    // Отключаем стандартное всплытие клика, чтобы не срабатывало дважды
     settingsIconElem.addEventListener('click', (e) => {
-        // Ничего не делаем, логика в cancelLongPress
+        e.preventDefault();
+        e.stopPropagation();
+        // Ничего не делаем, т.к. логика в cancelLongPress уже обработает клик
     });
+
+    // Основные события для мыши и касаний
     settingsIconElem.addEventListener('mousedown', startLongPress);
     settingsIconElem.addEventListener('mouseup', cancelLongPress);
     settingsIconElem.addEventListener('mouseleave', cancelLongPress);
-    // Для сенсорных экранов
     settingsIconElem.addEventListener('touchstart', startLongPress);
     settingsIconElem.addEventListener('touchend', cancelLongPress);
     settingsIconElem.addEventListener('touchcancel', cancelLongPress);
@@ -702,6 +706,7 @@
         if (secretMenu.classList.contains('show')) {
             if (!secretMenu.contains(e.target) && e.target !== settingsIconElem) {
                 secretMenu.classList.remove('show');
+                isLongPress = false;
             }
         }
     });
