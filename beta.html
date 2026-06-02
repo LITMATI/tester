@@ -31,6 +31,7 @@
             --modal-content-bg: #ffffff;
             --modal-text: #0f172a;
             --input-bg: #f1f5f9;
+            --select-hover: #e2e8f0;
         }
 
         body.dark {
@@ -53,6 +54,7 @@
             --modal-content-bg: #1e293b;
             --modal-text: #f1f5f9;
             --input-bg: #334155;
+            --select-hover: #3b4a5c;
         }
 
         body {
@@ -116,6 +118,7 @@
             background: var(--bg-card);
             display: flex;
             flex-direction: column;
+            transition: background 0.2s;
         }
 
         .panel:first-child {
@@ -129,16 +132,46 @@
             padding: 1rem 1rem 0.5rem 1rem;
         }
 
-        select {
+        /* КРАСИВЫЙ ВЫПАДАЮЩИЙ СПИСОК */
+        .custom-select {
+            position: relative;
+            display: inline-block;
             background: var(--select-bg);
-            border: none;
-            padding: 0.4rem 0.8rem;
             border-radius: 2rem;
-            font-size: 0.8rem;
+            padding: 0.4rem 2rem 0.4rem 1rem;
+            font-size: 0.85rem;
             font-weight: 500;
             color: var(--select-color);
             cursor: pointer;
-            outline: none;
+            transition: 0.2s;
+            user-select: none;
+            border: none;
+            appearance: none;
+            -webkit-appearance: none;
+            background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23475669' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'></polyline></svg>");
+            background-repeat: no-repeat;
+            background-position: right 0.8rem center;
+            background-size: 1rem;
+        }
+        body.dark .custom-select {
+            background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'></polyline></svg>");
+        }
+        .custom-select:hover {
+            background-color: var(--select-hover);
+        }
+        select {
+            opacity: 0;
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            cursor: pointer;
+            z-index: 2;
+        }
+        .select-text {
+            display: inline-block;
+            pointer-events: none;
         }
 
         textarea, .readonly-area {
@@ -407,11 +440,14 @@
     <div class="translate-panel">
         <div class="panel">
             <div class="lang-header">
-                <select id="leftLangSelect">
-                    <option value="ru">Русский</option>
-                    <option value="mell">Меллстройный</option>
-                    <option value="usb">USB</option>
-                </select>
+                <div class="custom-select" id="leftSelectWrapper">
+                    <span class="select-text" id="leftSelectedText">Русский</span>
+                    <select id="leftLangSelect">
+                        <option value="ru">Русский</option>
+                        <option value="mell">Меллстройный</option>
+                        <option value="usb">USB</option>
+                    </select>
+                </div>
             </div>
             <textarea id="inputArea" placeholder="Введите текст..."></textarea>
             <div class="action-bar">
@@ -428,11 +464,14 @@
         </button>
         <div class="panel">
             <div class="lang-header">
-                <select id="rightLangSelect">
-                    <option value="mell">Меллстройный</option>
-                    <option value="ru">Русский</option>
-                    <option value="usb">USB</option>
-                </select>
+                <div class="custom-select" id="rightSelectWrapper">
+                    <span class="select-text" id="rightSelectedText">Меллстройный</span>
+                    <select id="rightLangSelect">
+                        <option value="mell">Меллстройный</option>
+                        <option value="ru">Русский</option>
+                        <option value="usb">USB</option>
+                    </select>
+                </div>
                 <button class="icon-btn" id="speakBtn" title="Озвучить">
                     <svg viewBox="0 0 24 24" fill="currentColor" stroke="none" class="solid"><path d="M3 9v6h4l5 5V4L7 9H3z M16.5 12c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z M14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/></svg>
                 </button>
@@ -503,7 +542,7 @@
 </div>
 
 <script>
-    // ======================= ОСНОВНЫЕ СЛОВАРИ И ФУНКЦИИ ПЕРЕВОДА =======================
+    // ======================= ОСНОВНЫЕ СЛОВАРИ И ФУНКЦИИ ПЕРЕВОДА (без изменений) =======================
     let rusToMell = new Map();
     let mellToRus = new Map();
     let rusToUsb = new Map();
@@ -531,17 +570,27 @@
     // ======================= UI ЛОГИКА ПЕРЕВОДА =======================
     const inputArea=document.getElementById('inputArea');
     const outputArea=document.getElementById('outputArea');
-    const leftLang=document.getElementById('leftLangSelect');
-    const rightLang=document.getElementById('rightLangSelect');
+    const leftLangSelect=document.getElementById('leftLangSelect');
+    const rightLangSelect=document.getElementById('rightLangSelect');
+    const leftSelectedText=document.getElementById('leftSelectedText');
+    const rightSelectedText=document.getElementById('rightSelectedText');
     const swapBtn=document.getElementById('swapBtn');
     const speakBtn=document.getElementById('speakBtn');
     const copyLeftBtn=document.getElementById('copyLeftBtn');
     const copyRightBtn=document.getElementById('copyRightBtn');
     const clearLeftBtn=document.getElementById('clearLeftBtn');
     const clearRightBtn=document.getElementById('clearRightBtn');
+
+    function updateSelectedText() {
+        leftSelectedText.innerText = leftLangSelect.options[leftLangSelect.selectedIndex]?.text || 'Русский';
+        rightSelectedText.innerText = rightLangSelect.options[rightLangSelect.selectedIndex]?.text || 'Меллстройный';
+    }
+    leftLangSelect.addEventListener('change', updateSelectedText);
+    rightLangSelect.addEventListener('change', updateSelectedText);
+    updateSelectedText();
     
     function updateTranslation(){
-        let src=leftLang.value,dst=rightLang.value;
+        let src=leftLangSelect.value,dst=rightLangSelect.value;
         if(src===dst){outputArea.innerText=inputArea.value;return;}
         let text=inputArea.value,result;
         if(src==='ru'&&dst==='mell')result=translateToMell(text);
@@ -556,9 +605,30 @@
     let timer;
     function debounced(){clearTimeout(timer);timer=setTimeout(updateTranslation,250);}
     inputArea.addEventListener('input',debounced);
-    leftLang.addEventListener('change',()=>{if(leftLang.value===rightLang.value){let other=leftLang.value==='ru'?'mell':(leftLang.value==='mell'?'usb':'ru');rightLang.value=other;}debounced();});
-    rightLang.addEventListener('change',()=>{if(rightLang.value===leftLang.value){let other=rightLang.value==='ru'?'mell':(rightLang.value==='mell'?'usb':'ru');leftLang.value=other;}debounced();});
-    swapBtn.addEventListener('click',()=>{let l=leftLang.value,r=rightLang.value;leftLang.value=r;rightLang.value=l;let lt=inputArea.value,rt=outputArea.innerText;inputArea.value=rt;updateTranslation();});
+    leftLangSelect.addEventListener('change',()=>{
+        if(leftLangSelect.value===rightLangSelect.value){
+            let other=leftLangSelect.value==='ru'?'mell':(leftLangSelect.value==='mell'?'usb':'ru');
+            rightLangSelect.value=other;
+            updateSelectedText();
+        }
+        debounced();
+    });
+    rightLangSelect.addEventListener('change',()=>{
+        if(rightLangSelect.value===leftLangSelect.value){
+            let other=rightLangSelect.value==='ru'?'mell':(rightLangSelect.value==='mell'?'usb':'ru');
+            leftLangSelect.value=other;
+            updateSelectedText();
+        }
+        debounced();
+    });
+    swapBtn.addEventListener('click',()=>{
+        let l=leftLangSelect.value,r=rightLangSelect.value;
+        leftLangSelect.value=r;rightLangSelect.value=l;
+        updateSelectedText();
+        let lt=inputArea.value,rt=outputArea.innerText;
+        inputArea.value=rt;
+        updateTranslation();
+    });
 
     // ======================= НАСТРОЙКИ И СОХРАНЕНИЕ =======================
     const volumeRange = document.getElementById('volumeRange');
@@ -651,7 +721,7 @@
         outputArea.innerText = '';
     });
 
-    // ======================= ИСПРАВЛЕННАЯ ЛОГИКА: ДОЛГОЕ НАЖАТИЕ ОТКРЫВАЕТ СЕКРЕТНОЕ МЕНЮ И НЕ ЗАКРЫВАЕТ ЕГО ПРИ ОТПУСКАНИИ =======================
+    // ======================= ЛОГИКА НАСТРОЕК И СЕКРЕТНОГО МЕНЮ =======================
     const modal = document.getElementById('settingsModal');
     const settingsIconElem = document.getElementById('settingsIcon');
     const closeModalBtn = document.getElementById('closeModalBtn');
@@ -681,39 +751,33 @@
             clearTimeout(longPressTimer);
             longPressTimer = null;
         }
-        // Ничего не делаем, меню не закрываем
     }
 
     function handleClick(e) {
         if (!longPressTriggered) {
             openNormalSettings();
         }
-        // Сбрасываем флаг для следующего нажатия
         setTimeout(() => {
             longPressTriggered = false;
         }, 50);
     }
 
-    // Блокируем контекстное меню (появляется при долгом тапе)
     settingsIconElem.addEventListener('contextmenu', (e) => {
         e.preventDefault();
         return false;
     });
-
     settingsIconElem.addEventListener('mousedown', startLongPress);
     settingsIconElem.addEventListener('mouseup', cancelLongPress);
     settingsIconElem.addEventListener('mouseleave', cancelLongPress);
     settingsIconElem.addEventListener('click', handleClick);
-
     settingsIconElem.addEventListener('touchstart', startLongPress, { passive: false });
     settingsIconElem.addEventListener('touchend', cancelLongPress);
     settingsIconElem.addEventListener('touchcancel', cancelLongPress);
-    settingsIconElem.addEventListener('click', handleClick); // для тач-экранов
+    settingsIconElem.addEventListener('click', handleClick);
 
     closeModalBtn.addEventListener('click', () => modal.classList.remove('open'));
     modal.addEventListener('click', (e) => { if (e.target === modal) modal.classList.remove('open'); });
 
-    // Закрытие секретного меню при клике вне него
     document.addEventListener('click', (e) => {
         if (secretMenu.classList.contains('show')) {
             if (!secretMenu.contains(e.target) && e.target !== settingsIconElem) {
