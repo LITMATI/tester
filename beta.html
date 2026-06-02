@@ -401,7 +401,7 @@
     </style>
 </head>
 <body>
-<div class="beta-watermark" id="betaWatermark">BETA 6.5</div>
+<div class="beta-watermark" id="betaWatermark">BETA 6.7</div>
 <div class="container">
     <div class="translate-panel">
         <div class="panel">
@@ -490,7 +490,7 @@
             <input type="checkbox" id="hideWatermarkCheckbox">
         </div>
         <div class="info-text">
-            Версия: BETA 6.5<br>
+            Версия: BETA 6.7<br>
             Автор: LITMati<br>
             Сайт: <a href="https://litmati.github.io/tiktok" target="_blank">litmati.github.io/tiktok</a>
         </div>
@@ -644,62 +644,64 @@
         outputArea.innerText = '';
     });
 
+    // === НАСТРОЙКИ: обычный клик — обычное меню, долгое нажатие — секретное ===
     const modal = document.getElementById('settingsModal');
-    const settingsIcon = document.getElementById('settingsIcon');
+    const settingsIconElem = document.getElementById('settingsIcon');
     const closeModalBtn = document.getElementById('closeModalBtn');
     const secretMenu = document.getElementById('secretMenu');
     
-    let longPressTimer = null;
-    let isLongPressActive = false;
+    let longPressActive = false;
+    let longPressTimerId = null;
 
-    function openModalNormal() {
-        if (!isLongPressActive) {
+    function openSettingsModal() {
+        if (!longPressActive) {
             modal.classList.add('open');
         }
     }
 
     function startLongPress(e) {
-        e.preventDefault();
-        isLongPressActive = false;
-        longPressTimer = setTimeout(() => {
-            isLongPressActive = true;
+        // предотвращаем случайное открытие при долгом нажатии
+        longPressActive = false;
+        longPressTimerId = setTimeout(() => {
+            longPressActive = true;
+            // Открываем секретное меню (показываем)
             secretMenu.classList.add('show');
-            longPressTimer = null;
+            longPressTimerId = null;
         }, 500);
     }
 
     function cancelLongPress(e) {
-        if (longPressTimer) {
-            clearTimeout(longPressTimer);
-            longPressTimer = null;
+        if (longPressTimerId) {
+            clearTimeout(longPressTimerId);
+            longPressTimerId = null;
         }
-        if (!isLongPressActive) {
-            openModalNormal();
+        if (!longPressActive) {
+            openSettingsModal();
         }
-        isLongPressActive = false;
+        // Сбрасываем флаг после клика, чтобы следующий клик работал
+        setTimeout(() => { longPressActive = false; }, 100);
     }
 
-    settingsIcon.addEventListener('click', (e) => {
-        if (isLongPressActive) {
-            e.stopPropagation();
-            return;
-        }
+    // Отключаем любые hover-эффекты, открывающие модалку
+    settingsIconElem.addEventListener('click', (e) => {
+        // Ничего не делаем, логика в cancelLongPress
     });
-    settingsIcon.addEventListener('mousedown', startLongPress);
-    settingsIcon.addEventListener('mouseup', cancelLongPress);
-    settingsIcon.addEventListener('mouseleave', cancelLongPress);
-    settingsIcon.addEventListener('touchstart', startLongPress);
-    settingsIcon.addEventListener('touchend', cancelLongPress);
-    settingsIcon.addEventListener('touchcancel', cancelLongPress);
+    settingsIconElem.addEventListener('mousedown', startLongPress);
+    settingsIconElem.addEventListener('mouseup', cancelLongPress);
+    settingsIconElem.addEventListener('mouseleave', cancelLongPress);
+    // Для сенсорных экранов
+    settingsIconElem.addEventListener('touchstart', startLongPress);
+    settingsIconElem.addEventListener('touchend', cancelLongPress);
+    settingsIconElem.addEventListener('touchcancel', cancelLongPress);
 
     closeModalBtn.addEventListener('click', () => modal.classList.remove('open'));
     modal.addEventListener('click', (e) => { if (e.target === modal) modal.classList.remove('open'); });
 
+    // Закрытие секретного меню при клике вне его
     document.addEventListener('click', (e) => {
         if (secretMenu.classList.contains('show')) {
-            if (!secretMenu.contains(e.target) && e.target !== settingsIcon) {
+            if (!secretMenu.contains(e.target) && e.target !== settingsIconElem) {
                 secretMenu.classList.remove('show');
-                isLongPressActive = false;
             }
         }
     });
@@ -709,7 +711,7 @@
         location.reload();
     });
     document.getElementById('showVersionBtn').addEventListener('click', () => {
-        alert('Текущая версия: BETA 6.5\nАвтор: LITMati\nСайт: litmati.github.io/tiktok');
+        alert('Текущая версия: BETA 6.7\nАвтор: LITMati\nСайт: litmati.github.io/tiktok');
         secretMenu.classList.remove('show');
     });
 
