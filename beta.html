@@ -491,7 +491,7 @@
         </div>
         <div class="info-text">
             Версия: BETA 0.7.0 (X.Y.Z)<br>
-            • X — глобальные изменения (архитектура)<br>
+            • X — глобальные изменения<br>
             • Y — новые функции<br>
             • Z — исправление багов<br>
             Автор: LITMati<br>
@@ -502,7 +502,7 @@
 </div>
 
 <script>
-    // ======================= ОСНОВНЫЕ СЛОВАРИ И ФУНКЦИИ ПЕРЕВОДА =======================
+    // ======================= ОСНОВНЫЕ СЛОВАРИ И ФУНКЦИИ ПЕРЕВОДА (БЕЗ ИЗМЕНЕНИЙ) =======================
     let rusToMell = new Map();
     let mellToRus = new Map();
     let rusToUsb = new Map();
@@ -527,7 +527,7 @@
     function translateFromUsb(text){if(!text.trim())return "";let work=text,ph=new Map(),idx=0;for(let[from,to]of phraseUsbToRus){let esc=from.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');let re=new RegExp(`(^|[\\s\\p{P}])(${esc})(?=[\\s\\p{P}]|$)`, 'giu');work=work.replace(re,(match,before,word)=>{let repl=to;if(word===word.toUpperCase())repl=to.toUpperCase();else if(word[0]===word[0].toUpperCase()&&word.slice(1).toLowerCase()===word.slice(1))repl=to.charAt(0).toUpperCase()+to.slice(1).toLowerCase();else repl=to.toLowerCase();let p=`\uE000${idx++}\uE001`;ph.set(p,repl);return before+p;});}let tokens=tokenize(work),out=[];for(let t of tokens){if(ph.has(t)){out.push(ph.get(t));continue;}if(!/[a-zA-Z]/.test(t)){out.push(t);continue;}let low=t.toLowerCase();if(usbToRus.has(low)){out.push(applyCase(t,usbToRus.get(low)));continue;}out.push(translitToCyrillic(t));}return out.join('');}
     async function loadDictionary(){try{let resp=await fetch('dictionary.json');if(!resp.ok)throw new Error(`HTTP ${resp.status}`);let dict=await resp.json();rusToMell.clear();mellToRus.clear();rusToUsb.clear();usbToRus.clear();if(dict.rusToMell)for(let[k,v]of Object.entries(dict.rusToMell))rusToMell.set(k.toLowerCase(),v);if(dict.rusToUsb)for(let[k,v]of Object.entries(dict.rusToUsb))rusToUsb.set(k.toLowerCase(),v);for(let[rus,mell]of rusToMell.entries())mellToRus.set(mell.toLowerCase(),rus);for(let[rus,usb]of rusToUsb.entries())usbToRus.set(usb.toLowerCase(),rus);if(dict.extraReverse)for(let[m,r]of Object.entries(dict.extraReverse))if(!mellToRus.has(m.toLowerCase()))mellToRus.set(m.toLowerCase(),r);if(dict.extraUsbReverse)for(let[u,r]of Object.entries(dict.extraUsbReverse))if(!usbToRus.has(u.toLowerCase()))usbToRus.set(u.toLowerCase(),r);phraseRusToMell=dict.phrases?.rusToMell||[];phraseMellToRus=dict.phrases?.mellToRus||[];phraseRusToUsb=dict.phrases?.rusToUsb||[];phraseUsbToRus=dict.phrases?.usbToRus||[];phraseRusToMell.sort((a,b)=>b[0].length-a[0].length);phraseMellToRus.sort((a,b)=>b[0].length-a[0].length);phraseRusToUsb.sort((a,b)=>b[0].length-a[0].length);phraseUsbToRus.sort((a,b)=>b[0].length-a[0].length);updateTranslation();}catch(e){console.error(e);}}
 
-    // ======================= UI ЛОГИКА =======================
+    // ======================= UI ЛОГИКА ПЕРЕВОДА =======================
     const inputArea=document.getElementById('inputArea');
     const outputArea=document.getElementById('outputArea');
     const leftLang=document.getElementById('leftLangSelect');
@@ -650,25 +650,27 @@
         outputArea.innerText = '';
     });
 
-    // ======================= ЛОГИКА ОТКРЫТИЯ НАСТРОЕК И СЕКРЕТНОГО МЕНЮ =======================
+    // ======================= ИСПРАВЛЕННАЯ ЛОГИКА: КОРОТКОЕ НАЖАТИЕ = НАСТРОЙКИ, ДОЛГОЕ = СЕКРЕТНОЕ МЕНЮ (НЕ ЗАКРЫВАЕТСЯ ПРИ ОТПУСКАНИИ) =======================
     const modal = document.getElementById('settingsModal');
     const settingsIconElem = document.getElementById('settingsIcon');
     const closeModalBtn = document.getElementById('closeModalBtn');
     const secretMenu = document.getElementById('secretMenu');
 
     let longPressTimer = null;
-    let longPressActivated = false;
+    let isLongPress = false;
 
     function openNormalSettings() {
-        if (!longPressActivated) {
+        if (!isLongPress) {
             modal.classList.add('open');
         }
     }
 
     function startLongPress(e) {
-        longPressActivated = false;
+        // Предотвращаем контекстное меню браузера
+        e.preventDefault();
+        isLongPress = false;
         longPressTimer = setTimeout(() => {
-            longPressActivated = true;
+            isLongPress = true;
             secretMenu.classList.add('show');
             longPressTimer = null;
         }, 500);
@@ -679,31 +681,46 @@
             clearTimeout(longPressTimer);
             longPressTimer = null;
         }
+        // НЕ закрываем секретное меню, если оно уже открыто
     }
 
     function handleClick(e) {
-        if (!longPressActivated) {
-            modal.classList.add('open');
+        if (!isLongPress) {
+            openNormalSettings();
         }
-        setTimeout(() => { longPressActivated = false; }, 50);
+        // Сброс флага после обработки клика
+        setTimeout(() => {
+            isLongPress = false;
+        }, 50);
     }
 
+    // Блокируем стандартное контекстное меню
+    settingsIconElem.addEventListener('contextmenu', (e) => {
+        e.preventDefault();
+        return false;
+    });
+
+    // События для мыши
     settingsIconElem.addEventListener('mousedown', startLongPress);
     settingsIconElem.addEventListener('mouseup', cancelLongPress);
     settingsIconElem.addEventListener('mouseleave', cancelLongPress);
-    settingsIconElem.addEventListener('touchstart', startLongPress);
+    settingsIconElem.addEventListener('click', handleClick);
+
+    // События для тач-экранов
+    settingsIconElem.addEventListener('touchstart', startLongPress, { passive: false });
     settingsIconElem.addEventListener('touchend', cancelLongPress);
     settingsIconElem.addEventListener('touchcancel', cancelLongPress);
-    settingsIconElem.addEventListener('click', handleClick);
+    settingsIconElem.addEventListener('click', handleClick); // для тач тоже нужен click
 
     closeModalBtn.addEventListener('click', () => modal.classList.remove('open'));
     modal.addEventListener('click', (e) => { if (e.target === modal) modal.classList.remove('open'); });
 
+    // Закрытие секретного меню при клике вне его
     document.addEventListener('click', (e) => {
         if (secretMenu.classList.contains('show')) {
             if (!secretMenu.contains(e.target) && e.target !== settingsIconElem) {
                 secretMenu.classList.remove('show');
-                longPressActivated = false;
+                isLongPress = false;
             }
         }
     });
