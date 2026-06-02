@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <title>Переводчик</title>
+    <title>Переводчик | PRE-RELEASE</title>
     <style>
         * {
             margin: 0;
@@ -69,7 +69,7 @@
             transition: background 0.2s, color 0.2s;
         }
 
-        .beta-watermark {
+        .prerelease-watermark {
             position: fixed;
             top: 0;
             left: 0;
@@ -91,7 +91,7 @@
             user-select: none;
             transition: opacity 0.2s;
         }
-        .beta-watermark.hidden {
+        .prerelease-watermark.hidden {
             opacity: 0;
         }
 
@@ -132,7 +132,6 @@
             padding: 1rem 1rem 0.5rem 1rem;
         }
 
-        /* КРАСИВЫЙ ВЫПАДАЮЩИЙ СПИСОК – УЛУЧШЕННЫЙ ДИЗАЙН */
         .custom-select {
             position: relative;
             display: inline-flex;
@@ -384,14 +383,14 @@
             background: var(--bg-card);
             border: 1px solid var(--border);
             border-radius: 50%;
-            width: 48px;
-            height: 48px;
+            width: 56px;
+            height: 56px;
             display: flex;
             align-items: center;
             justify-content: center;
             cursor: pointer;
             z-index: 1002;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.15);
             transition: 0.2s;
             color: var(--icon-color);
             user-select: none;
@@ -400,10 +399,17 @@
         .settings-icon:active {
             transform: scale(0.96);
         }
+        .settings-icon svg {
+            width: 28px;
+            height: 28px;
+            stroke: currentColor;
+            stroke-width: 1.8;
+            fill: none;
+        }
 
         .secret-menu {
             position: fixed;
-            bottom: 80px;
+            bottom: 90px;
             right: 20px;
             background: var(--modal-content-bg);
             border: 1px solid var(--border);
@@ -455,11 +461,21 @@
             .select-text {
                 max-width: 100px;
             }
+            .settings-icon {
+                width: 60px;
+                height: 60px;
+                bottom: 16px;
+                right: 16px;
+            }
+            .settings-icon svg {
+                width: 30px;
+                height: 30px;
+            }
         }
     </style>
 </head>
 <body>
-<div class="beta-watermark" id="betaWatermark">BETA 0.7.3</div>
+<div class="prerelease-watermark" id="prereleaseWatermark">PRE-RELEASE 1.0.0</div>
 <div class="container">
     <div class="translate-panel">
         <div class="panel">
@@ -514,7 +530,7 @@
 </div>
 
 <div class="settings-icon" id="settingsIcon">
-    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
         <circle cx="12" cy="12" r="3"></circle>
         <path d="M19.4 15a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H5.78a1.65 1.65 0 0 0-1.51 1 1.65 1.65 0 0 0 .33 1.82l.13.13a1.65 1.65 0 0 0 1.51.82H17.76a1.65 1.65 0 0 0 1.51-.82z"></path>
         <path d="M4.6 9a1.65 1.65 0 0 0-.33 1.82 1.65 1.65 0 0 0 1.51 1H18.22a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.13-.13a1.65 1.65 0 0 0-1.51-.82H6.24a1.65 1.65 0 0 0-1.51.82z"></path>
@@ -550,14 +566,11 @@
             <input type="checkbox" id="autoClearCheckbox">
         </div>
         <div class="setting-group">
-            <label>Скрыть водяной знак BETA</label>
+            <label>Скрыть водяной знак</label>
             <input type="checkbox" id="hideWatermarkCheckbox">
         </div>
         <div class="info-text">
-            Версия: BETA 0.7.3 (X.Y.Z)<br>
-            • X — глобальные изменения<br>
-            • Y — новые функции<br>
-            • Z — исправление багов<br>
+            Версия: PRE-RELEASE 1.0.0<br>
             Автор: LITMati<br>
             Сайт: <a href="https://litmati.github.io/tiktok" target="_blank">litmati.github.io/tiktok</a>
         </div>
@@ -592,18 +605,18 @@
     async function loadDictionary(){try{let resp=await fetch('dictionary.json');if(!resp.ok)throw new Error(`HTTP ${resp.status}`);let dict=await resp.json();rusToMell.clear();mellToRus.clear();rusToUsb.clear();usbToRus.clear();if(dict.rusToMell)for(let[k,v]of Object.entries(dict.rusToMell))rusToMell.set(k.toLowerCase(),v);if(dict.rusToUsb)for(let[k,v]of Object.entries(dict.rusToUsb))rusToUsb.set(k.toLowerCase(),v);for(let[rus,mell]of rusToMell.entries())mellToRus.set(mell.toLowerCase(),rus);for(let[rus,usb]of rusToUsb.entries())usbToRus.set(usb.toLowerCase(),rus);if(dict.extraReverse)for(let[m,r]of Object.entries(dict.extraReverse))if(!mellToRus.has(m.toLowerCase()))mellToRus.set(m.toLowerCase(),r);if(dict.extraUsbReverse)for(let[u,r]of Object.entries(dict.extraUsbReverse))if(!usbToRus.has(u.toLowerCase()))usbToRus.set(u.toLowerCase(),r);phraseRusToMell=dict.phrases?.rusToMell||[];phraseMellToRus=dict.phrases?.mellToRus||[];phraseRusToUsb=dict.phrases?.rusToUsb||[];phraseUsbToRus=dict.phrases?.usbToRus||[];phraseRusToMell.sort((a,b)=>b[0].length-a[0].length);phraseMellToRus.sort((a,b)=>b[0].length-a[0].length);phraseRusToUsb.sort((a,b)=>b[0].length-a[0].length);phraseUsbToRus.sort((a,b)=>b[0].length-a[0].length);updateTranslation();}catch(e){console.error(e);}}
 
     // ======================= UI ЛОГИКА ПЕРЕВОДА =======================
-    const inputArea=document.getElementById('inputArea');
-    const outputArea=document.getElementById('outputArea');
-    const leftLangSelect=document.getElementById('leftLangSelect');
-    const rightLangSelect=document.getElementById('rightLangSelect');
-    const leftSelectedText=document.getElementById('leftSelectedText');
-    const rightSelectedText=document.getElementById('rightSelectedText');
-    const swapBtn=document.getElementById('swapBtn');
-    const speakBtn=document.getElementById('speakBtn');
-    const copyLeftBtn=document.getElementById('copyLeftBtn');
-    const copyRightBtn=document.getElementById('copyRightBtn');
-    const clearLeftBtn=document.getElementById('clearLeftBtn');
-    const clearRightBtn=document.getElementById('clearRightBtn');
+    const inputArea = document.getElementById('inputArea');
+    const outputArea = document.getElementById('outputArea');
+    const leftLangSelect = document.getElementById('leftLangSelect');
+    const rightLangSelect = document.getElementById('rightLangSelect');
+    const leftSelectedText = document.getElementById('leftSelectedText');
+    const rightSelectedText = document.getElementById('rightSelectedText');
+    const swapBtn = document.getElementById('swapBtn');
+    const speakBtn = document.getElementById('speakBtn');
+    const copyLeftBtn = document.getElementById('copyLeftBtn');
+    const copyRightBtn = document.getElementById('copyRightBtn');
+    const clearLeftBtn = document.getElementById('clearLeftBtn');
+    const clearRightBtn = document.getElementById('clearRightBtn');
 
     function updateSelectedText() {
         leftSelectedText.innerText = leftLangSelect.options[leftLangSelect.selectedIndex]?.text || 'Русский';
@@ -614,43 +627,43 @@
     updateSelectedText();
     
     function updateTranslation(){
-        let src=leftLangSelect.value,dst=rightLangSelect.value;
-        if(src===dst){outputArea.innerText=inputArea.value;return;}
-        let text=inputArea.value,result;
-        if(src==='ru'&&dst==='mell')result=translateToMell(text);
-        else if(src==='mell'&&dst==='ru')result=translateToRus(text);
-        else if(src==='ru'&&dst==='usb')result=translateToUsb(text);
-        else if(src==='usb'&&dst==='ru')result=translateFromUsb(text);
-        else if(src==='mell'&&dst==='usb')result=translateToUsb(translateToRus(text));
-        else if(src==='usb'&&dst==='mell')result=translateToMell(translateFromUsb(text));
-        else result=text;
-        outputArea.innerText=result;
+        let src = leftLangSelect.value, dst = rightLangSelect.value;
+        if (src === dst) { outputArea.innerText = inputArea.value; return; }
+        let text = inputArea.value, result;
+        if (src === 'ru' && dst === 'mell') result = translateToMell(text);
+        else if (src === 'mell' && dst === 'ru') result = translateToRus(text);
+        else if (src === 'ru' && dst === 'usb') result = translateToUsb(text);
+        else if (src === 'usb' && dst === 'ru') result = translateFromUsb(text);
+        else if (src === 'mell' && dst === 'usb') result = translateToUsb(translateToRus(text));
+        else if (src === 'usb' && dst === 'mell') result = translateToMell(translateFromUsb(text));
+        else result = text;
+        outputArea.innerText = result;
     }
     let timer;
-    function debounced(){clearTimeout(timer);timer=setTimeout(updateTranslation,250);}
-    inputArea.addEventListener('input',debounced);
-    leftLangSelect.addEventListener('change',()=>{
-        if(leftLangSelect.value===rightLangSelect.value){
-            let other=leftLangSelect.value==='ru'?'mell':(leftLangSelect.value==='mell'?'usb':'ru');
-            rightLangSelect.value=other;
+    function debounced(){ clearTimeout(timer); timer = setTimeout(updateTranslation, 250); }
+    inputArea.addEventListener('input', debounced);
+    leftLangSelect.addEventListener('change', () => {
+        if (leftLangSelect.value === rightLangSelect.value) {
+            let other = leftLangSelect.value === 'ru' ? 'mell' : (leftLangSelect.value === 'mell' ? 'usb' : 'ru');
+            rightLangSelect.value = other;
             updateSelectedText();
         }
         debounced();
     });
-    rightLangSelect.addEventListener('change',()=>{
-        if(rightLangSelect.value===leftLangSelect.value){
-            let other=rightLangSelect.value==='ru'?'mell':(rightLangSelect.value==='mell'?'usb':'ru');
-            leftLangSelect.value=other;
+    rightLangSelect.addEventListener('change', () => {
+        if (rightLangSelect.value === leftLangSelect.value) {
+            let other = rightLangSelect.value === 'ru' ? 'mell' : (rightLangSelect.value === 'mell' ? 'usb' : 'ru');
+            leftLangSelect.value = other;
             updateSelectedText();
         }
         debounced();
     });
-    swapBtn.addEventListener('click',()=>{
-        let l=leftLangSelect.value,r=rightLangSelect.value;
-        leftLangSelect.value=r;rightLangSelect.value=l;
+    swapBtn.addEventListener('click', () => {
+        let l = leftLangSelect.value, r = rightLangSelect.value;
+        leftLangSelect.value = r; rightLangSelect.value = l;
         updateSelectedText();
-        let lt=inputArea.value,rt=outputArea.innerText;
-        inputArea.value=rt;
+        let lt = inputArea.value, rt = outputArea.innerText;
+        inputArea.value = rt;
         updateTranslation();
     });
 
@@ -660,7 +673,7 @@
     const themeSelect = document.getElementById('themeSelect');
     const autoClearCheckbox = document.getElementById('autoClearCheckbox');
     const hideWatermarkCheckbox = document.getElementById('hideWatermarkCheckbox');
-    const betaWatermark = document.getElementById('betaWatermark');
+    const watermark = document.getElementById('prereleaseWatermark');
 
     const savedVolume = localStorage.getItem('speechVolume');
     const savedRate = localStorage.getItem('speechRate');
@@ -672,7 +685,7 @@
     if (savedRate !== null) rateRange.value = savedRate;
     autoClearCheckbox.checked = savedAutoClear;
     hideWatermarkCheckbox.checked = savedHideWatermark;
-    if (savedHideWatermark) betaWatermark.classList.add('hidden');
+    if (savedHideWatermark) watermark.classList.add('hidden');
 
     let currentVolume = volumeRange.value / 100;
     let currentRate = parseFloat(rateRange.value);
@@ -709,8 +722,8 @@
     hideWatermarkCheckbox.addEventListener('change', () => {
         const isHidden = hideWatermarkCheckbox.checked;
         localStorage.setItem('hideWatermark', isHidden);
-        if (isHidden) betaWatermark.classList.add('hidden');
-        else betaWatermark.classList.remove('hidden');
+        if (isHidden) watermark.classList.add('hidden');
+        else watermark.classList.remove('hidden');
     });
 
     speakBtn.addEventListener('click', () => {
@@ -745,68 +758,76 @@
         outputArea.innerText = '';
     });
 
-    // ======================= ЛОГИКА НАСТРОЕК И СЕКРЕТНОГО МЕНЮ =======================
+    // ======================= НАСТРОЙКИ И СЕКРЕТНОЕ МЕНЮ (исправленная логика для сенсорных экранов) =======================
     const modal = document.getElementById('settingsModal');
     const settingsIconElem = document.getElementById('settingsIcon');
     const closeModalBtn = document.getElementById('closeModalBtn');
     const secretMenu = document.getElementById('secretMenu');
 
-    let longPressTimer = null;
-    let longPressTriggered = false;
+    let pressTimer = null;
+    let isLongPress = false;
 
-    function openNormalSettings() {
-        if (!longPressTriggered) {
+    function openSettingsModal() {
+        if (!isLongPress) {
             modal.classList.add('open');
         }
     }
 
-    function startLongPress(e) {
+    function startPress(e) {
+        // Предотвращаем вызов контекстного меню
         e.preventDefault();
-        longPressTriggered = false;
-        longPressTimer = setTimeout(() => {
-            longPressTriggered = true;
+        isLongPress = false;
+        pressTimer = setTimeout(() => {
+            isLongPress = true;
             secretMenu.classList.add('show');
-            longPressTimer = null;
+            pressTimer = null;
         }, 500);
     }
 
-    function cancelLongPress(e) {
-        if (longPressTimer) {
-            clearTimeout(longPressTimer);
-            longPressTimer = null;
+    function endPress(e) {
+        if (pressTimer) {
+            clearTimeout(pressTimer);
+            pressTimer = null;
         }
-    }
-
-    function handleClick(e) {
-        if (!longPressTriggered) {
-            openNormalSettings();
+        // Если не было долгого нажатия – открываем обычные настройки
+        if (!isLongPress) {
+            openSettingsModal();
         }
+        // Сбрасываем флаг для следующего касания
         setTimeout(() => {
-            longPressTriggered = false;
-        }, 50);
+            isLongPress = false;
+        }, 100);
     }
 
+    // Отменяем контекстное меню
     settingsIconElem.addEventListener('contextmenu', (e) => {
         e.preventDefault();
         return false;
     });
-    settingsIconElem.addEventListener('mousedown', startLongPress);
-    settingsIconElem.addEventListener('mouseup', cancelLongPress);
-    settingsIconElem.addEventListener('mouseleave', cancelLongPress);
-    settingsIconElem.addEventListener('click', handleClick);
-    settingsIconElem.addEventListener('touchstart', startLongPress, { passive: false });
-    settingsIconElem.addEventListener('touchend', cancelLongPress);
-    settingsIconElem.addEventListener('touchcancel', cancelLongPress);
-    settingsIconElem.addEventListener('click', handleClick);
+    // Для мыши и тач-экранов (универсально через pointerdown/pointerup)
+    settingsIconElem.addEventListener('pointerdown', startPress);
+    settingsIconElem.addEventListener('pointerup', endPress);
+    settingsIconElem.addEventListener('pointercancel', endPress);
+    // Дополнительно для старых браузеров
+    settingsIconElem.addEventListener('touchstart', startPress, { passive: false });
+    settingsIconElem.addEventListener('touchend', endPress);
+    settingsIconElem.addEventListener('touchcancel', endPress);
+    settingsIconElem.addEventListener('mousedown', startPress);
+    settingsIconElem.addEventListener('mouseup', endPress);
+    // Предотвращаем клик, который может дублировать действия
+    settingsIconElem.addEventListener('click', (e) => {
+        e.stopPropagation();
+    });
 
     closeModalBtn.addEventListener('click', () => modal.classList.remove('open'));
     modal.addEventListener('click', (e) => { if (e.target === modal) modal.classList.remove('open'); });
 
+    // Закрытие секретного меню при клике вне его
     document.addEventListener('click', (e) => {
         if (secretMenu.classList.contains('show')) {
             if (!secretMenu.contains(e.target) && e.target !== settingsIconElem) {
                 secretMenu.classList.remove('show');
-                longPressTriggered = false;
+                isLongPress = false;
             }
         }
     });
@@ -816,7 +837,7 @@
         location.reload();
     });
     document.getElementById('showVersionBtn').addEventListener('click', () => {
-        alert('Текущая версия: BETA 0.7.3 (X.Y.Z)\n• X — глобальные изменения\n• Y — новые функции\n• Z — исправление багов\n\nАвтор: LITMati\nСайт: litmati.github.io/tiktok');
+        alert('Текущая версия: PRE-RELEASE 1.0.0\nАвтор: LITMati\nСайт: litmati.github.io/tiktok');
         secretMenu.classList.remove('show');
     });
 
