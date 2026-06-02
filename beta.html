@@ -20,7 +20,7 @@
             padding: 1rem;
             position: relative;
         }
-        .beta-tag {
+        .version-tag {
             position: fixed;
             top: 16px;
             left: 16px;
@@ -179,7 +179,7 @@
     </style>
 </head>
 <body>
-<div class="beta-tag">BETA 5.9</div>
+<div class="version-tag">BETA 5.10</div>
 <div class="container">
     <div class="translate-panel">
         <!-- Левая панель -->
@@ -247,6 +247,7 @@
 </div>
 
 <script>
+    // === Версия увеличена до 5.10 ===
     // Словари (заполняются из dictionary.json)
     let rusToMell = new Map();
     let mellToRus = new Map();
@@ -305,7 +306,7 @@
         return r;
     }
 
-    // Проверка мусорных слов (только осмысленные переводятся)
+    // Проверка мусорных слов
     function isGarbageWord(word) {
         if (!word || word.length === 0) return true;
         if (word.length <= 2 && !rusToMell.has(word.toLowerCase()) && !rusToUsb.has(word.toLowerCase())) return true;
