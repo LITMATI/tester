@@ -401,7 +401,7 @@
     </style>
 </head>
 <body>
-<div class="beta-watermark" id="betaWatermark">BETA 6.4</div>
+<div class="beta-watermark" id="betaWatermark">BETA 6.5</div>
 <div class="container">
     <div class="translate-panel">
         <div class="panel">
@@ -490,7 +490,7 @@
             <input type="checkbox" id="hideWatermarkCheckbox">
         </div>
         <div class="info-text">
-            Версия: BETA 6.4<br>
+            Версия: BETA 6.5<br>
             Автор: LITMati<br>
             Сайт: <a href="https://litmati.github.io/tiktok" target="_blank">litmati.github.io/tiktok</a>
         </div>
@@ -499,7 +499,6 @@
 </div>
 
 <script>
-    // ---------- СЛОВАРИ И ПЕРЕВОД (КОМПАКТНО, НО ПОЛНОСТЬЮ РАБОЧИЕ) ----------
     let rusToMell = new Map();
     let mellToRus = new Map();
     let rusToUsb = new Map();
@@ -555,7 +554,6 @@
     rightLang.addEventListener('change',()=>{if(rightLang.value===leftLang.value){let other=rightLang.value==='ru'?'mell':(rightLang.value==='mell'?'usb':'ru');leftLang.value=other;}debounced();});
     swapBtn.addEventListener('click',()=>{let l=leftLang.value,r=rightLang.value;leftLang.value=r;rightLang.value=l;let lt=inputArea.value,rt=outputArea.innerText;inputArea.value=rt;updateTranslation();});
 
-    // --- НАСТРОЙКИ С СОХРАНЕНИЕМ В localStorage ---
     const volumeRange = document.getElementById('volumeRange');
     const rateRange = document.getElementById('rateRange');
     const themeSelect = document.getElementById('themeSelect');
@@ -646,37 +644,49 @@
         outputArea.innerText = '';
     });
 
-    // Модальное окно настроек
     const modal = document.getElementById('settingsModal');
     const settingsIcon = document.getElementById('settingsIcon');
     const closeModalBtn = document.getElementById('closeModalBtn');
-    settingsIcon.addEventListener('click', () => modal.classList.add('open'));
+    const secretMenu = document.getElementById('secretMenu');
+    let longPressTimer = null;
+    let isLongPress = false;
+
+    function openModal() {
+        if (!isLongPress) {
+            modal.classList.add('open');
+        }
+    }
+
+    function startLongPress() {
+        isLongPress = false;
+        longPressTimer = setTimeout(() => {
+            isLongPress = true;
+            secretMenu.classList.toggle('show');
+            longPressTimer = null;
+        }, 500);
+    }
+
+    function cancelLongPress() {
+        if (longPressTimer) {
+            clearTimeout(longPressTimer);
+            longPressTimer = null;
+        }
+        if (!isLongPress) {
+            openModal();
+        }
+        isLongPress = false;
+    }
+
+    settingsIcon.addEventListener('mousedown', startLongPress);
+    settingsIcon.addEventListener('mouseup', cancelLongPress);
+    settingsIcon.addEventListener('mouseleave', cancelLongPress);
+    settingsIcon.addEventListener('touchstart', startLongPress);
+    settingsIcon.addEventListener('touchend', cancelLongPress);
+    settingsIcon.addEventListener('touchcancel', cancelLongPress);
+
     closeModalBtn.addEventListener('click', () => modal.classList.remove('open'));
     modal.addEventListener('click', (e) => { if (e.target === modal) modal.classList.remove('open'); });
 
-    // --- СЕКРЕТНОЕ МЕНЮ (долгое нажатие) ---
-    const secretMenu = document.getElementById('secretMenu');
-    let pressTimer = null;
-
-    function startPressTimer() {
-        pressTimer = setTimeout(() => {
-            secretMenu.classList.toggle('show');
-        }, 500);
-    }
-    function cancelPressTimer() {
-        if (pressTimer) {
-            clearTimeout(pressTimer);
-            pressTimer = null;
-        }
-    }
-    settingsIcon.addEventListener('mousedown', startPressTimer);
-    settingsIcon.addEventListener('mouseup', cancelPressTimer);
-    settingsIcon.addEventListener('mouseleave', cancelPressTimer);
-    settingsIcon.addEventListener('touchstart', startPressTimer);
-    settingsIcon.addEventListener('touchend', cancelPressTimer);
-    settingsIcon.addEventListener('touchcancel', cancelPressTimer);
-
-    // Закрытие секретного меню при клике в любом месте (кроме самого меню и кнопки настроек)
     document.addEventListener('click', (e) => {
         if (secretMenu.classList.contains('show')) {
             if (!secretMenu.contains(e.target) && e.target !== settingsIcon) {
@@ -685,13 +695,12 @@
         }
     });
 
-    // Кнопки секретного меню
     document.getElementById('resetSettingsBtn').addEventListener('click', () => {
         localStorage.clear();
         location.reload();
     });
     document.getElementById('showVersionBtn').addEventListener('click', () => {
-        alert('Текущая версия: BETA 6.4\nАвтор: LITMati\nСайт: litmati.github.io/tiktok');
+        alert('Текущая версия: BETA 6.5\nАвтор: LITMati\nСайт: litmati.github.io/tiktok');
         secretMenu.classList.remove('show');
     });
 
