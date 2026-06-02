@@ -648,35 +648,43 @@
     const settingsIcon = document.getElementById('settingsIcon');
     const closeModalBtn = document.getElementById('closeModalBtn');
     const secretMenu = document.getElementById('secretMenu');
+    
     let longPressTimer = null;
-    let isLongPress = false;
+    let isLongPressActive = false;
 
-    function openModal() {
-        if (!isLongPress) {
+    function openModalNormal() {
+        if (!isLongPressActive) {
             modal.classList.add('open');
         }
     }
 
-    function startLongPress() {
-        isLongPress = false;
+    function startLongPress(e) {
+        e.preventDefault();
+        isLongPressActive = false;
         longPressTimer = setTimeout(() => {
-            isLongPress = true;
-            secretMenu.classList.toggle('show');
+            isLongPressActive = true;
+            secretMenu.classList.add('show');
             longPressTimer = null;
         }, 500);
     }
 
-    function cancelLongPress() {
+    function cancelLongPress(e) {
         if (longPressTimer) {
             clearTimeout(longPressTimer);
             longPressTimer = null;
         }
-        if (!isLongPress) {
-            openModal();
+        if (!isLongPressActive) {
+            openModalNormal();
         }
-        isLongPress = false;
+        isLongPressActive = false;
     }
 
+    settingsIcon.addEventListener('click', (e) => {
+        if (isLongPressActive) {
+            e.stopPropagation();
+            return;
+        }
+    });
     settingsIcon.addEventListener('mousedown', startLongPress);
     settingsIcon.addEventListener('mouseup', cancelLongPress);
     settingsIcon.addEventListener('mouseleave', cancelLongPress);
@@ -691,6 +699,7 @@
         if (secretMenu.classList.contains('show')) {
             if (!secretMenu.contains(e.target) && e.target !== settingsIcon) {
                 secretMenu.classList.remove('show');
+                isLongPressActive = false;
             }
         }
     });
