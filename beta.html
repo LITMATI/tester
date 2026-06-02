@@ -67,6 +67,7 @@
             transition: background 0.2s, color 0.2s;
         }
 
+        /* Водяной знак BETA */
         .beta-watermark {
             position: fixed;
             top: 0;
@@ -87,6 +88,10 @@
             transform: rotate(-15deg);
             letter-spacing: 0.2em;
             user-select: none;
+            transition: opacity 0.2s;
+        }
+        .beta-watermark.hidden {
+            opacity: 0;
         }
 
         .container {
@@ -340,9 +345,42 @@
             box-shadow: 0 2px 8px rgba(0,0,0,0.1);
             transition: 0.2s;
             color: var(--icon-color);
+            user-select: none;
         }
-        .settings-icon:hover {
-            transform: rotate(30deg);
+        .settings-icon:active {
+            transform: scale(0.96);
+        }
+
+        /* Секретное меню (маленькое окошко) */
+        .secret-menu {
+            position: fixed;
+            bottom: 80px;
+            right: 20px;
+            background: var(--modal-content-bg);
+            border: 1px solid var(--border);
+            border-radius: 1rem;
+            padding: 1rem;
+            width: 220px;
+            z-index: 1003;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            backdrop-filter: blur(8px);
+            display: none;
+            flex-direction: column;
+            gap: 0.8rem;
+        }
+        .secret-menu.show {
+            display: flex;
+        }
+        .secret-menu button {
+            background: var(--select-bg);
+            border: none;
+            padding: 0.3rem 0.8rem;
+            border-radius: 1.5rem;
+            cursor: pointer;
+            color: var(--select-color);
+            font-size: 0.8rem;
+        }
+        .secret-menu button:hover {
             background: var(--icon-hover-bg);
         }
 
@@ -366,7 +404,7 @@
     </style>
 </head>
 <body>
-<div class="beta-watermark">BETA 6.2</div>
+<div class="beta-watermark" id="betaWatermark">BETA 6.4</div>
 <div class="container">
     <div class="translate-panel">
         <div class="panel">
@@ -414,7 +452,7 @@
     </div>
 </div>
 
-<!-- Кнопка настроек (шестерёнка) -->
+<!-- Кнопка настроек -->
 <div class="settings-icon" id="settingsIcon">
     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
         <circle cx="12" cy="12" r="3"></circle>
@@ -423,7 +461,14 @@
     </svg>
 </div>
 
-<!-- Модальное окно настроек (полный экран) -->
+<!-- Секретное меню (появляется при долгом нажатии на шестерёнку) -->
+<div id="secretMenu" class="secret-menu">
+    <button id="resetSettingsBtn">Сбросить настройки</button>
+    <button id="showVersionBtn">Показать версию</button>
+    <button id="closeSecretBtn">Закрыть</button>
+</div>
+
+<!-- Модальное окно настроек -->
 <div id="settingsModal" class="modal">
     <div class="modal-content">
         <h2>Настройки</h2>
@@ -447,8 +492,12 @@
             <label>Автоочистка после копирования</label>
             <input type="checkbox" id="autoClearCheckbox">
         </div>
+        <div class="setting-group">
+            <label>Скрыть водяной знак BETA</label>
+            <input type="checkbox" id="hideWatermarkCheckbox">
+        </div>
         <div class="info-text">
-            Версия: BETA 6.2<br>
+            Версия: BETA 6.4<br>
             Автор: LITMati<br>
             Сайт: <a href="https://litmati.github.io/tiktok" target="_blank">litmati.github.io/tiktok</a>
         </div>
@@ -526,26 +575,30 @@
     rightLang.addEventListener('change',()=>{if(rightLang.value===leftLang.value){let other=rightLang.value==='ru'?'mell':(rightLang.value==='mell'?'usb':'ru');leftLang.value=other;}debounced();});
     swapBtn.addEventListener('click',()=>{let l=leftLang.value,r=rightLang.value;leftLang.value=r;rightLang.value=l;let lt=inputArea.value,rt=outputArea.innerText;inputArea.value=rt;updateTranslation();});
 
-    // --- Сохранение настроек в localStorage ---
+    // --- Настройки с сохранением в localStorage ---
     const volumeRange = document.getElementById('volumeRange');
     const rateRange = document.getElementById('rateRange');
     const themeSelect = document.getElementById('themeSelect');
     const autoClearCheckbox = document.getElementById('autoClearCheckbox');
+    const hideWatermarkCheckbox = document.getElementById('hideWatermarkCheckbox');
+    const betaWatermark = document.getElementById('betaWatermark');
 
     // Загрузка сохранённых значений
     const savedVolume = localStorage.getItem('speechVolume');
     const savedRate = localStorage.getItem('speechRate');
     const savedTheme = localStorage.getItem('theme') || 'system';
     const savedAutoClear = localStorage.getItem('autoClear') === 'true';
+    const savedHideWatermark = localStorage.getItem('hideWatermark') === 'true';
 
     if (savedVolume !== null) volumeRange.value = savedVolume;
     if (savedRate !== null) rateRange.value = savedRate;
     autoClearCheckbox.checked = savedAutoClear;
+    hideWatermarkCheckbox.checked = savedHideWatermark;
+    if (savedHideWatermark) betaWatermark.classList.add('hidden');
 
     let currentVolume = volumeRange.value / 100;
     let currentRate = parseFloat(rateRange.value);
 
-    // Применение темы
     function applyTheme(theme) {
         if (theme === 'system') {
             if (window.matchMedia('(prefers-color-scheme: dark)').matches) document.body.classList.add('dark');
@@ -564,7 +617,6 @@
         if (themeSelect.value === 'system') applyTheme('system');
     });
 
-    // Сохранение громкости
     volumeRange.addEventListener('input', (e) => {
         currentVolume = e.target.value / 100;
         localStorage.setItem('speechVolume', e.target.value);
@@ -576,8 +628,13 @@
     autoClearCheckbox.addEventListener('change', () => {
         localStorage.setItem('autoClear', autoClearCheckbox.checked);
     });
+    hideWatermarkCheckbox.addEventListener('change', () => {
+        const isHidden = hideWatermarkCheckbox.checked;
+        localStorage.setItem('hideWatermark', isHidden);
+        if (isHidden) betaWatermark.classList.add('hidden');
+        else betaWatermark.classList.remove('hidden');
+    });
 
-    // Озвучивание с текущими настройками
     speakBtn.addEventListener('click', () => {
         let text = outputArea.innerText;
         if (text && text.trim()) {
@@ -590,7 +647,6 @@
         }
     });
 
-    // Копирование с автоочисткой
     copyLeftBtn.addEventListener('click', () => {
         inputArea.select();
         navigator.clipboard.writeText(inputArea.value);
@@ -618,6 +674,41 @@
     settingsIcon.addEventListener('click', () => modal.classList.add('open'));
     closeModalBtn.addEventListener('click', () => modal.classList.remove('open'));
     modal.addEventListener('click', (e) => { if (e.target === modal) modal.classList.remove('open'); });
+
+    // ---- Секретное меню (долгое нажатие на шестерёнку) ----
+    const secretMenu = document.getElementById('secretMenu');
+    let pressTimer = null;
+
+    function startPressTimer() {
+        pressTimer = setTimeout(() => {
+            secretMenu.classList.add('show');
+        }, 500);
+    }
+    function cancelPressTimer() {
+        if (pressTimer) {
+            clearTimeout(pressTimer);
+            pressTimer = null;
+        }
+    }
+    settingsIcon.addEventListener('mousedown', startPressTimer);
+    settingsIcon.addEventListener('mouseup', cancelPressTimer);
+    settingsIcon.addEventListener('mouseleave', cancelPressTimer);
+    settingsIcon.addEventListener('touchstart', startPressTimer);
+    settingsIcon.addEventListener('touchend', cancelPressTimer);
+    settingsIcon.addEventListener('touchcancel', cancelPressTimer);
+
+    // Кнопки секретного меню
+    document.getElementById('resetSettingsBtn').addEventListener('click', () => {
+        localStorage.clear();
+        location.reload();
+    });
+    document.getElementById('showVersionBtn').addEventListener('click', () => {
+        alert('Текущая версия: BETA 6.4\nАвтор: LITMati\nСайт: litmati.github.io/tiktok');
+        secretMenu.classList.remove('show');
+    });
+    document.getElementById('closeSecretBtn').addEventListener('click', () => {
+        secretMenu.classList.remove('show');
+    });
 
     inputArea.value = 'нормально, попа, жопа, училка, нет, почему, хай, шприц';
     loadDictionary();
