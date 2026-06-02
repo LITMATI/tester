@@ -20,6 +20,20 @@
             padding: 1rem;
             position: relative;
         }
+        .beta-tag {
+            position: fixed;
+            top: 16px;
+            left: 16px;
+            font-family: monospace;
+            font-size: 0.75rem;
+            font-weight: 500;
+            color: #000000;
+            opacity: 0.3;
+            background: transparent;
+            pointer-events: none;
+            z-index: 1000;
+            letter-spacing: 0.5px;
+        }
         .container {
             max-width: 1100px;
             width: 100%;
@@ -128,43 +142,57 @@
                 transform: rotate(90deg) scale(1.02);
             }
         }
-        .beta-watermark {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            pointer-events: none;
-            z-index: 1000;
-            font-family: monospace;
-            font-weight: bold;
-            font-size: clamp(3rem, 15vw, 12rem);
-            color: #000000;
-            opacity: 0.12;
-            white-space: nowrap;
-            transform: rotate(-15deg);
-            letter-spacing: 0.2em;
-            user-select: none;
-        }
-        @media (max-width: 600px) {
-            .beta-watermark {
-                opacity: 0.08;
-                font-size: clamp(2rem, 12vw, 8rem);
-            }
-        }
         .status {
             text-align: center;
             margin-top: 0.5rem;
             font-size: 0.75rem;
             color: #4a6a8a;
         }
+        .info-button {
+            display: inline-block;
+            margin-top: 1rem;
+            text-align: center;
+        }
+        .info-link {
+            background: #eef2ff;
+            padding: 0.4rem 1rem;
+            border-radius: 2rem;
+            font-size: 0.75rem;
+            color: #1e40af;
+            text-decoration: none;
+            font-weight: 500;
+            transition: 0.2s;
+        }
+        .info-link:hover {
+            background: #e0e7ff;
+        }
+        .speak-btn {
+            background: #f1f5f9;
+            border: none;
+            padding: 0.3rem 0.8rem;
+            border-radius: 2rem;
+            font-size: 0.7rem;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.3rem;
+            color: #475569;
+            transition: 0.2s;
+        }
+        .speak-btn:hover {
+            background: #e2e8f0;
+            color: #e6691a;
+        }
+        .output-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.75rem 1rem 0 1rem;
+        }
     </style>
 </head>
 <body>
-<div class="beta-watermark" id="betaLabel">BETA 5.8</div>
+<div class="beta-tag">BETA 5.9</div>
 <div class="container">
     <h1>Переводчик</h1>
     <div class="panel">
@@ -180,22 +208,23 @@
         </div>
         <button class="swap-btn" id="swapBtn">⇄</button>
         <div class="box">
-            <div class="lang-header">
+            <div class="output-header">
                 <select id="rightLangSelect">
                     <option value="mell">Меллстройный</option>
                     <option value="ru">Русский</option>
                     <option value="usb">USB</option>
                 </select>
+                <button class="speak-btn" id="speakBtn" title="Озвучить перевод">🔊 Озвучить</button>
             </div>
             <div class="readonly-area" id="outputArea"></div>
         </div>
     </div>
     <div class="status" id="statusMsg">Загрузка словаря...</div>
+    <div class="info-button">
+        <a href="about.html" class="info-link">О языках переводчика</a>
+    </div>
 </div>
 <script>
-    // ВЕРСИЯ – ТОЛЬКО РУЧНАЯ (увеличивай здесь, когда исправил баг)
-    document.getElementById('betaLabel').innerText = 'BETA 5.8';
-
     // Словари (заполняются из dictionary.json)
     let rusToMell = new Map();
     let mellToRus = new Map();
@@ -254,19 +283,27 @@
         return r;
     }
 
-    // Вспомогательные функции
-    function isGarbage(w) {
-        if (!w) return true;
-        let l = w.toLowerCase();
-        if (w.length <= 2 && !rusToMell.has(l) && !rusToUsb.has(l)) return true;
-        let patterns = [/(ха){2,}/i,/(ах){2,}/i,/(ол){2,}/i,/(ло){2,}/i,/(ла){2,}/i,
-            /хехе/i,/хихи/i,/хохо/i,/лол/i,/кек/i,/агага/i,/уху/i,/ааа+/i,/ыыы+/i,/еее+/i];
-        for (let p of patterns) if (p.test(l)) return true;
-        if (/(.)\1{3,}/i.test(l)) return true;
-        if (w === w.toUpperCase() && l.length >= 4 && /^(?:[а-яa-z])(?:[^а-яa-z]?\1)+$/i.test(l)) return true;
-        if (!/[аеёиоуыэюяaeiou]/i.test(l)) return true;
+    // Улучшенная проверка мусорных слов
+    function isGarbageWord(word) {
+        if (!word || word.length === 0) return true;
+        if (word.length <= 2 && !rusToMell.has(word.toLowerCase()) && !rusToUsb.has(word.toLowerCase())) return true;
+        const lower = word.toLowerCase();
+        const laughPatterns = [
+            /(ха){2,}/i, /(ах){2,}/i, /(ол){2,}/i, /(ло){2,}/i, /(ла){2,}/i,
+            /хехе/i, /хихи/i, /хохо/i, /лол/i, /кек/i, /агага/i, /уху/i,
+            /ааа+/i, /ыыы+/i, /еее+/i
+        ];
+        for (let p of laughPatterns) if (p.test(lower)) return true;
+        if (/(.)\1{3,}/i.test(lower)) return true;
+        if (word === word.toUpperCase() && lower.length >= 4 && /^(?:[а-яa-z])(?:[^а-яa-z]?\1)+$/i.test(lower)) return true;
+        const hasRussianVowel = /[аеёиоуыэюя]/i.test(lower);
+        const hasLatinVowel = /[aeiouy]/i.test(lower);
+        if (!hasRussianVowel && !hasLatinVowel) return true;
+        const consonantSeq = lower.match(/[бвгджзйклмнпрстфхцчшщ]{3,}/i);
+        if (consonantSeq && !rusToMell.has(lower) && !rusToUsb.has(lower)) return true;
         return false;
     }
+
     function applyGeneralRule(wordLower) {
         if (wordLower.endsWith("а")) return wordLower.slice(0, -1) + "оность";
         if (wordLower.endsWith("я")) return wordLower.slice(0, -1) + "ёность";
@@ -293,7 +330,7 @@
         return text.match(/([a-zA-Zа-яА-ЯёЁ]+|[^a-zA-Zа-яА-ЯёЁ]+)/g) || [];
     }
 
-    // ПЕРЕВОДЧИКИ (используют данные, загруженные из JSON)
+    // Функции перевода
     function translateToMell(text) {
         if (!text.trim()) return "";
         let work = text;
@@ -319,7 +356,7 @@
             if (!/[a-zA-Zа-яА-ЯёЁ]/.test(t)) { out.push(t); continue; }
             let low = t.toLowerCase();
             if (rusToMell.has(low)) { out.push(applyCase(t, rusToMell.get(low))); continue; }
-            if (isGarbage(t)) { out.push(t); continue; }
+            if (isGarbageWord(t)) { out.push(t); continue; }
             out.push(applyCase(t, applyGeneralRule(low)));
         }
         return out.join('');
@@ -416,40 +453,28 @@
         return out.join('');
     }
 
-    // ЗАГРУЗКА СЛОВАРЯ ИЗ ФАЙЛА dictionary.json (ГИТХАБ)
+    // Загрузка словаря
     async function loadDictionary() {
         try {
             let resp = await fetch('dictionary.json');
             if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
             let dict = await resp.json();
 
-            // Очистка перед загрузкой
             rusToMell.clear();
             mellToRus.clear();
             rusToUsb.clear();
             usbToRus.clear();
 
-            // Основные словари
             if (dict.rusToMell) {
-                for (let [k, v] of Object.entries(dict.rusToMell)) {
-                    rusToMell.set(k.toLowerCase(), v);
-                }
+                for (let [k, v] of Object.entries(dict.rusToMell)) rusToMell.set(k.toLowerCase(), v);
             }
             if (dict.rusToUsb) {
-                for (let [k, v] of Object.entries(dict.rusToUsb)) {
-                    rusToUsb.set(k.toLowerCase(), v);
-                }
+                for (let [k, v] of Object.entries(dict.rusToUsb)) rusToUsb.set(k.toLowerCase(), v);
             }
 
-            // Обратные отображения
-            for (let [rus, mell] of rusToMell.entries()) {
-                mellToRus.set(mell.toLowerCase(), rus);
-            }
-            for (let [rus, usb] of rusToUsb.entries()) {
-                usbToRus.set(usb.toLowerCase(), rus);
-            }
+            for (let [rus, mell] of rusToMell.entries()) mellToRus.set(mell.toLowerCase(), rus);
+            for (let [rus, usb] of rusToUsb.entries()) usbToRus.set(usb.toLowerCase(), rus);
 
-            // Дополнительные обратные соответствия (если есть)
             if (dict.extraReverse) {
                 for (let [m, r] of Object.entries(dict.extraReverse)) {
                     if (!mellToRus.has(m.toLowerCase())) mellToRus.set(m.toLowerCase(), r);
@@ -461,32 +486,31 @@
                 }
             }
 
-            // Фразы (составные выражения) – обязательно из JSON
             phraseRusToMell = dict.phrases?.rusToMell || [];
             phraseMellToRus = dict.phrases?.mellToRus || [];
             phraseRusToUsb = dict.phrases?.rusToUsb || [];
             phraseUsbToRus = dict.phrases?.usbToRus || [];
 
-            // Сортировка для корректной замены (от длинных к коротким)
             phraseRusToMell.sort((a,b)=>b[0].length - a[0].length);
             phraseMellToRus.sort((a,b)=>b[0].length - a[0].length);
             phraseRusToUsb.sort((a,b)=>b[0].length - a[0].length);
             phraseUsbToRus.sort((a,b)=>b[0].length - a[0].length);
 
             document.getElementById('statusMsg').innerHTML = 'Словарь загружен';
-            updateTranslation(); // применяем перевод
+            updateTranslation();
         } catch(e) {
             console.error(e);
-            document.getElementById('statusMsg').innerHTML = 'Ошибка загрузки dictionary.json. Проверьте файл.';
+            document.getElementById('statusMsg').innerHTML = 'Ошибка загрузки dictionary.json';
         }
     }
 
-    // UI
+    // UI логика
     const inputArea = document.getElementById('inputArea');
     const outputArea = document.getElementById('outputArea');
     const leftLang = document.getElementById('leftLangSelect');
     const rightLang = document.getElementById('rightLangSelect');
     const swapBtn = document.getElementById('swapBtn');
+    const speakBtn = document.getElementById('speakBtn');
 
     function updateTranslation() {
         let src = leftLang.value, dst = rightLang.value;
@@ -535,7 +559,26 @@
         updateTranslation();
     });
 
-    // Стартовый текст (пример)
+    // Функция озвучивания текста (Web Speech API)
+    function speakText(text) {
+        if (!text || text.trim() === '') return;
+        // Останавливаем текущее воспроизведение, если оно есть
+        if (window.speechSynthesis.speaking) {
+            window.speechSynthesis.cancel();
+        }
+        const utterance = new SpeechSynthesisUtterance(text);
+        utterance.lang = 'ru-RU';
+        utterance.rate = 0.9;
+        utterance.pitch = 1.0;
+        utterance.volume = 1;
+        window.speechSynthesis.speak(utterance);
+    }
+
+    speakBtn.addEventListener('click', () => {
+        const textToSpeak = outputArea.innerText;
+        speakText(textToSpeak);
+    });
+
     inputArea.value = 'нормально, попа, жопа, училка, нет, почему, хай, шприц';
     loadDictionary();
 </script>
