@@ -526,58 +526,100 @@
     rightLang.addEventListener('change',()=>{if(rightLang.value===leftLang.value){let other=rightLang.value==='ru'?'mell':(rightLang.value==='mell'?'usb':'ru');leftLang.value=other;}debounced();});
     swapBtn.addEventListener('click',()=>{let l=leftLang.value,r=rightLang.value;leftLang.value=r;rightLang.value=l;let lt=inputArea.value,rt=outputArea.innerText;inputArea.value=rt;updateTranslation();});
 
-    // Настройки звука
-    let volumeRange=document.getElementById('volumeRange');
-    let rateRange=document.getElementById('rateRange');
-    let currentVolume=volumeRange.value/100;
-    let currentRate=parseFloat(rateRange.value);
-    volumeRange.addEventListener('input',(e)=>{currentVolume=e.target.value/100;});
-    rateRange.addEventListener('input',(e)=>{currentRate=parseFloat(e.target.value);});
-    speakBtn.addEventListener('click',()=>{
-        let text=outputArea.innerText;
-        if(text&&text.trim()){
-            if(window.speechSynthesis.speaking)window.speechSynthesis.cancel();
-            let utterance=new SpeechSynthesisUtterance(text);
-            utterance.lang='ru-RU';
-            utterance.rate=currentRate;
-            utterance.volume=currentVolume;
+    // --- Сохранение настроек в localStorage ---
+    const volumeRange = document.getElementById('volumeRange');
+    const rateRange = document.getElementById('rateRange');
+    const themeSelect = document.getElementById('themeSelect');
+    const autoClearCheckbox = document.getElementById('autoClearCheckbox');
+
+    // Загрузка сохранённых значений
+    const savedVolume = localStorage.getItem('speechVolume');
+    const savedRate = localStorage.getItem('speechRate');
+    const savedTheme = localStorage.getItem('theme') || 'system';
+    const savedAutoClear = localStorage.getItem('autoClear') === 'true';
+
+    if (savedVolume !== null) volumeRange.value = savedVolume;
+    if (savedRate !== null) rateRange.value = savedRate;
+    autoClearCheckbox.checked = savedAutoClear;
+
+    let currentVolume = volumeRange.value / 100;
+    let currentRate = parseFloat(rateRange.value);
+
+    // Применение темы
+    function applyTheme(theme) {
+        if (theme === 'system') {
+            if (window.matchMedia('(prefers-color-scheme: dark)').matches) document.body.classList.add('dark');
+            else document.body.classList.remove('dark');
+        } else if (theme === 'dark') {
+            document.body.classList.add('dark');
+        } else {
+            document.body.classList.remove('dark');
+        }
+        localStorage.setItem('theme', theme);
+        themeSelect.value = theme;
+    }
+    applyTheme(savedTheme);
+    themeSelect.addEventListener('change', (e) => applyTheme(e.target.value));
+    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
+        if (themeSelect.value === 'system') applyTheme('system');
+    });
+
+    // Сохранение громкости
+    volumeRange.addEventListener('input', (e) => {
+        currentVolume = e.target.value / 100;
+        localStorage.setItem('speechVolume', e.target.value);
+    });
+    rateRange.addEventListener('input', (e) => {
+        currentRate = parseFloat(e.target.value);
+        localStorage.setItem('speechRate', e.target.value);
+    });
+    autoClearCheckbox.addEventListener('change', () => {
+        localStorage.setItem('autoClear', autoClearCheckbox.checked);
+    });
+
+    // Озвучивание с текущими настройками
+    speakBtn.addEventListener('click', () => {
+        let text = outputArea.innerText;
+        if (text && text.trim()) {
+            if (window.speechSynthesis.speaking) window.speechSynthesis.cancel();
+            let utterance = new SpeechSynthesisUtterance(text);
+            utterance.lang = 'ru-RU';
+            utterance.rate = currentRate;
+            utterance.volume = currentVolume;
             window.speechSynthesis.speak(utterance);
         }
     });
 
-    // Темная тема
-    const themeSelect=document.getElementById('themeSelect');
-    function applyTheme(theme){
-        if(theme==='system'){if(window.matchMedia('(prefers-color-scheme: dark)').matches)document.body.classList.add('dark');else document.body.classList.remove('dark');}
-        else if(theme==='dark')document.body.classList.add('dark');
-        else document.body.classList.remove('dark');
-        localStorage.setItem('theme',theme);
-        themeSelect.value=theme;
-    }
-    const savedTheme=localStorage.getItem('theme')||'system';
-    applyTheme(savedTheme);
-    themeSelect.addEventListener('change',(e)=>applyTheme(e.target.value));
-    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change',()=>{if(themeSelect.value==='system')applyTheme('system');});
-
-    // Автоочистка после копирования
-    const autoClearCheckbox=document.getElementById('autoClearCheckbox');
-    autoClearCheckbox.checked=localStorage.getItem('autoClear')==='true';
-    autoClearCheckbox.addEventListener('change',()=>{localStorage.setItem('autoClear',autoClearCheckbox.checked);});
-    
-    copyLeftBtn.addEventListener('click',()=>{inputArea.select();navigator.clipboard.writeText(inputArea.value);if(autoClearCheckbox.checked){inputArea.value='';updateTranslation();}});
-    copyRightBtn.addEventListener('click',()=>{navigator.clipboard.writeText(outputArea.innerText);if(autoClearCheckbox.checked){outputArea.innerText='';}});
-    clearLeftBtn.addEventListener('click',()=>{inputArea.value='';updateTranslation();});
-    clearRightBtn.addEventListener('click',()=>{outputArea.innerText='';});
+    // Копирование с автоочисткой
+    copyLeftBtn.addEventListener('click', () => {
+        inputArea.select();
+        navigator.clipboard.writeText(inputArea.value);
+        if (autoClearCheckbox.checked) {
+            inputArea.value = '';
+            updateTranslation();
+        }
+    });
+    copyRightBtn.addEventListener('click', () => {
+        navigator.clipboard.writeText(outputArea.innerText);
+        if (autoClearCheckbox.checked) outputArea.innerText = '';
+    });
+    clearLeftBtn.addEventListener('click', () => {
+        inputArea.value = '';
+        updateTranslation();
+    });
+    clearRightBtn.addEventListener('click', () => {
+        outputArea.innerText = '';
+    });
 
     // Модальное окно настроек
-    const modal=document.getElementById('settingsModal');
-    const settingsIcon=document.getElementById('settingsIcon');
-    const closeModalBtn=document.getElementById('closeModalBtn');
-    settingsIcon.addEventListener('click',()=>{modal.classList.add('open');});
-    closeModalBtn.addEventListener('click',()=>{modal.classList.remove('open');});
-    modal.addEventListener('click',(e)=>{if(e.target===modal)modal.classList.remove('open');});
-    
-    inputArea.value='нормально, попа, жопа, училка, нет, почему, хай, шприц';
+    const modal = document.getElementById('settingsModal');
+    const settingsIcon = document.getElementById('settingsIcon');
+    const closeModalBtn = document.getElementById('closeModalBtn');
+    settingsIcon.addEventListener('click', () => modal.classList.add('open'));
+    closeModalBtn.addEventListener('click', () => modal.classList.remove('open'));
+    modal.addEventListener('click', (e) => { if (e.target === modal) modal.classList.remove('open'); });
+
+    inputArea.value = 'нормально, попа, жопа, училка, нет, почему, хай, шприц';
     loadDictionary();
 </script>
 </body>
