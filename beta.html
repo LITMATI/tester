@@ -401,7 +401,7 @@
     </style>
 </head>
 <body>
-<div class="beta-watermark" id="betaWatermark">BETA 6.7</div>
+<div class="beta-watermark" id="betaWatermark">BETA 6.8</div>
 <div class="container">
     <div class="translate-panel">
         <div class="panel">
@@ -490,7 +490,7 @@
             <input type="checkbox" id="hideWatermarkCheckbox">
         </div>
         <div class="info-text">
-            Версия: BETA 6.7<br>
+            Версия: BETA 6.8<br>
             Автор: LITMati<br>
             Сайт: <a href="https://litmati.github.io/tiktok" target="_blank">litmati.github.io/tiktok</a>
         </div>
@@ -644,25 +644,26 @@
         outputArea.innerText = '';
     });
 
-    // === ИСПРАВЛЕННАЯ ЛОГИКА: обычный клик — настройки, долгое нажатие — секретное меню ===
+    // ========== ИСПРАВЛЕННАЯ ЛОГИКА НАСТРОЕК ==========
     const modal = document.getElementById('settingsModal');
     const settingsIconElem = document.getElementById('settingsIcon');
     const closeModalBtn = document.getElementById('closeModalBtn');
     const secretMenu = document.getElementById('secretMenu');
 
     let longPressTimer = null;
-    let isLongPress = false;
+    let longPressActivated = false;
 
     function openNormalSettings() {
-        if (!isLongPress) {
+        if (!longPressActivated) {
             modal.classList.add('open');
         }
     }
 
     function startLongPress(e) {
-        isLongPress = false;
+        // Не отменяем событие полностью, но готовим таймер
+        longPressActivated = false;
         longPressTimer = setTimeout(() => {
-            isLongPress = true;
+            longPressActivated = true;
             secretMenu.classList.add('show');
             longPressTimer = null;
         }, 500);
@@ -673,30 +674,27 @@
             clearTimeout(longPressTimer);
             longPressTimer = null;
         }
-        // Если долгого нажатия не было — открываем обычные настройки
-        if (!isLongPress) {
-            openNormalSettings();
-        }
-        // Сброс флага через небольшую задержку, чтобы не влиять на следующий клик
-        setTimeout(() => {
-            isLongPress = false;
-        }, 100);
+        // Ничего не делаем при отмене — открытие обычных настроек произойдёт по клику
     }
 
-    // Отключаем стандартное всплытие клика, чтобы не срабатывало дважды
-    settingsIconElem.addEventListener('click', (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        // Ничего не делаем, т.к. логика в cancelLongPress уже обработает клик
-    });
+    // Обработчик клика (для мыши и тач-экранов). Именно здесь открываем обычные настройки.
+    function handleClick(e) {
+        if (!longPressActivated) {
+            // Обычный клик — открываем настройки
+            modal.classList.add('open');
+        }
+        // Сбрасываем флаг для следующего раза
+        setTimeout(() => { longPressActivated = false; }, 50);
+    }
 
-    // Основные события для мыши и касаний
+    // Навешиваем события
     settingsIconElem.addEventListener('mousedown', startLongPress);
     settingsIconElem.addEventListener('mouseup', cancelLongPress);
     settingsIconElem.addEventListener('mouseleave', cancelLongPress);
     settingsIconElem.addEventListener('touchstart', startLongPress);
     settingsIconElem.addEventListener('touchend', cancelLongPress);
     settingsIconElem.addEventListener('touchcancel', cancelLongPress);
+    settingsIconElem.addEventListener('click', handleClick);
 
     closeModalBtn.addEventListener('click', () => modal.classList.remove('open'));
     modal.addEventListener('click', (e) => { if (e.target === modal) modal.classList.remove('open'); });
@@ -706,7 +704,7 @@
         if (secretMenu.classList.contains('show')) {
             if (!secretMenu.contains(e.target) && e.target !== settingsIconElem) {
                 secretMenu.classList.remove('show');
-                isLongPress = false;
+                longPressActivated = false;
             }
         }
     });
@@ -716,7 +714,7 @@
         location.reload();
     });
     document.getElementById('showVersionBtn').addEventListener('click', () => {
-        alert('Текущая версия: BETA 6.7\nАвтор: LITMati\nСайт: litmati.github.io/tiktok');
+        alert('Текущая версия: BETA 6.8\nАвтор: LITMati\nСайт: litmati.github.io/tiktok');
         secretMenu.classList.remove('show');
     });
 
