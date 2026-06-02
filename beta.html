@@ -345,18 +345,7 @@
             transform: rotate(30deg);
             background: var(--icon-hover-bg);
         }
-        .footer {
-            text-align: center;
-            font-size: 0.7rem;
-            color: var(--footer-color);
-            padding: 1rem;
-            border-top: 1px solid var(--border);
-            margin-top: 0.5rem;
-        }
-        .footer a {
-            color: var(--footer-color);
-            text-decoration: none;
-        }
+
         @media (max-width: 760px) {
             .translate-panel {
                 flex-direction: column;
@@ -422,9 +411,6 @@
                 </button>
             </div>
         </div>
-    </div>
-    <div class="footer">
-        <span>BETA 6.2</span> &nbsp;|&nbsp; <span>Автор: LITMati</span> &nbsp;|&nbsp; <a href="https://litmati.github.io/tiktok" target="_blank">litmati.github.io/tiktok</a>
     </div>
 </div>
 
@@ -573,7 +559,7 @@
     themeSelect.addEventListener('change',(e)=>applyTheme(e.target.value));
     window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change',()=>{if(themeSelect.value==='system')applyTheme('system');});
 
-    // Автоочистка после копирования (новая настройка)
+    // Автоочистка после копирования
     const autoClearCheckbox=document.getElementById('autoClearCheckbox');
     autoClearCheckbox.checked=localStorage.getItem('autoClear')==='true';
     autoClearCheckbox.addEventListener('change',()=>{localStorage.setItem('autoClear',autoClearCheckbox.checked);});
