@@ -344,6 +344,7 @@
             transition: 0.2s;
             color: var(--icon-color);
             user-select: none;
+            -webkit-tap-highlight-color: transparent;
         }
         .settings-icon:active {
             transform: scale(0.96);
@@ -401,7 +402,7 @@
     </style>
 </head>
 <body>
-<div class="beta-watermark" id="betaWatermark">BETA 0.7.0</div>
+<div class="beta-watermark" id="betaWatermark">BETA 0.7.1</div>
 <div class="container">
     <div class="translate-panel">
         <div class="panel">
@@ -490,7 +491,7 @@
             <input type="checkbox" id="hideWatermarkCheckbox">
         </div>
         <div class="info-text">
-            Версия: BETA 0.7.0 (X.Y.Z)<br>
+            Версия: BETA 0.7.1 (X.Y.Z)<br>
             • X — глобальные изменения<br>
             • Y — новые функции<br>
             • Z — исправление багов<br>
@@ -502,7 +503,7 @@
 </div>
 
 <script>
-    // ======================= ОСНОВНЫЕ СЛОВАРИ И ФУНКЦИИ ПЕРЕВОДА (БЕЗ ИЗМЕНЕНИЙ) =======================
+    // ======================= ОСНОВНЫЕ СЛОВАРИ И ФУНКЦИИ ПЕРЕВОДА =======================
     let rusToMell = new Map();
     let mellToRus = new Map();
     let rusToUsb = new Map();
@@ -650,27 +651,26 @@
         outputArea.innerText = '';
     });
 
-    // ======================= ИСПРАВЛЕННАЯ ЛОГИКА: КОРОТКОЕ НАЖАТИЕ = НАСТРОЙКИ, ДОЛГОЕ = СЕКРЕТНОЕ МЕНЮ (НЕ ЗАКРЫВАЕТСЯ ПРИ ОТПУСКАНИИ) =======================
+    // ======================= ИСПРАВЛЕННАЯ ЛОГИКА: ДОЛГОЕ НАЖАТИЕ ОТКРЫВАЕТ СЕКРЕТНОЕ МЕНЮ И НЕ ЗАКРЫВАЕТ ЕГО ПРИ ОТПУСКАНИИ =======================
     const modal = document.getElementById('settingsModal');
     const settingsIconElem = document.getElementById('settingsIcon');
     const closeModalBtn = document.getElementById('closeModalBtn');
     const secretMenu = document.getElementById('secretMenu');
 
     let longPressTimer = null;
-    let isLongPress = false;
+    let longPressTriggered = false;
 
     function openNormalSettings() {
-        if (!isLongPress) {
+        if (!longPressTriggered) {
             modal.classList.add('open');
         }
     }
 
     function startLongPress(e) {
-        // Предотвращаем контекстное меню браузера
         e.preventDefault();
-        isLongPress = false;
+        longPressTriggered = false;
         longPressTimer = setTimeout(() => {
-            isLongPress = true;
+            longPressTriggered = true;
             secretMenu.classList.add('show');
             longPressTimer = null;
         }, 500);
@@ -681,46 +681,44 @@
             clearTimeout(longPressTimer);
             longPressTimer = null;
         }
-        // НЕ закрываем секретное меню, если оно уже открыто
+        // Ничего не делаем, меню не закрываем
     }
 
     function handleClick(e) {
-        if (!isLongPress) {
+        if (!longPressTriggered) {
             openNormalSettings();
         }
-        // Сброс флага после обработки клика
+        // Сбрасываем флаг для следующего нажатия
         setTimeout(() => {
-            isLongPress = false;
+            longPressTriggered = false;
         }, 50);
     }
 
-    // Блокируем стандартное контекстное меню
+    // Блокируем контекстное меню (появляется при долгом тапе)
     settingsIconElem.addEventListener('contextmenu', (e) => {
         e.preventDefault();
         return false;
     });
 
-    // События для мыши
     settingsIconElem.addEventListener('mousedown', startLongPress);
     settingsIconElem.addEventListener('mouseup', cancelLongPress);
     settingsIconElem.addEventListener('mouseleave', cancelLongPress);
     settingsIconElem.addEventListener('click', handleClick);
 
-    // События для тач-экранов
     settingsIconElem.addEventListener('touchstart', startLongPress, { passive: false });
     settingsIconElem.addEventListener('touchend', cancelLongPress);
     settingsIconElem.addEventListener('touchcancel', cancelLongPress);
-    settingsIconElem.addEventListener('click', handleClick); // для тач тоже нужен click
+    settingsIconElem.addEventListener('click', handleClick); // для тач-экранов
 
     closeModalBtn.addEventListener('click', () => modal.classList.remove('open'));
     modal.addEventListener('click', (e) => { if (e.target === modal) modal.classList.remove('open'); });
 
-    // Закрытие секретного меню при клике вне его
+    // Закрытие секретного меню при клике вне него
     document.addEventListener('click', (e) => {
         if (secretMenu.classList.contains('show')) {
             if (!secretMenu.contains(e.target) && e.target !== settingsIconElem) {
                 secretMenu.classList.remove('show');
-                isLongPress = false;
+                longPressTriggered = false;
             }
         }
     });
@@ -730,7 +728,7 @@
         location.reload();
     });
     document.getElementById('showVersionBtn').addEventListener('click', () => {
-        alert('Текущая версия: BETA 0.7.0 (X.Y.Z)\n• X — глобальные изменения\n• Y — новые функции\n• Z — исправление багов\n\nАвтор: LITMati\nСайт: litmati.github.io/tiktok');
+        alert('Текущая версия: BETA 0.7.1 (X.Y.Z)\n• X — глобальные изменения\n• Y — новые функции\n• Z — исправление багов\n\nАвтор: LITMati\nСайт: litmati.github.io/tiktok');
         secretMenu.classList.remove('show');
     });
 
