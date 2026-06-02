@@ -159,7 +159,7 @@
         .custom-select:hover {
             background-color: var(--select-hover);
         }
-        select {
+        .custom-select select {
             opacity: 0;
             position: absolute;
             width: 100%;
@@ -324,13 +324,14 @@
             height: 4px;
             border-radius: 2px;
         }
-        select {
+        .theme-select {
             background: var(--input-bg);
             border: none;
             padding: 0.4rem 0.8rem;
             border-radius: 2rem;
             font-size: 0.8rem;
             color: var(--select-color);
+            cursor: pointer;
         }
         .info-text {
             margin-top: 1.5rem;
@@ -435,7 +436,7 @@
     </style>
 </head>
 <body>
-<div class="beta-watermark" id="betaWatermark">BETA 0.7.1</div>
+<div class="beta-watermark" id="betaWatermark">BETA 0.7.2</div>
 <div class="container">
     <div class="translate-panel">
         <div class="panel">
@@ -515,7 +516,7 @@
         </div>
         <div class="setting-group">
             <label>Тема оформления</label>
-            <select id="themeSelect">
+            <select id="themeSelect" class="theme-select">
                 <option value="system">Системная</option>
                 <option value="light">Светлая</option>
                 <option value="dark">Тёмная</option>
@@ -530,7 +531,7 @@
             <input type="checkbox" id="hideWatermarkCheckbox">
         </div>
         <div class="info-text">
-            Версия: BETA 0.7.1 (X.Y.Z)<br>
+            Версия: BETA 0.7.2 (X.Y.Z)<br>
             • X — глобальные изменения<br>
             • Y — новые функции<br>
             • Z — исправление багов<br>
@@ -792,7 +793,7 @@
         location.reload();
     });
     document.getElementById('showVersionBtn').addEventListener('click', () => {
-        alert('Текущая версия: BETA 0.7.1 (X.Y.Z)\n• X — глобальные изменения\n• Y — новые функции\n• Z — исправление багов\n\nАвтор: LITMati\nСайт: litmati.github.io/tiktok');
+        alert('Текущая версия: BETA 0.7.2 (X.Y.Z)\n• X — глобальные изменения\n• Y — новые функции\n• Z — исправление багов\n\nАвтор: LITMati\nСайт: litmati.github.io/tiktok');
         secretMenu.classList.remove('show');
     });
 
