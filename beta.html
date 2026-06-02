@@ -132,10 +132,11 @@
             padding: 1rem 1rem 0.5rem 1rem;
         }
 
-        /* КРАСИВЫЙ ВЫПАДАЮЩИЙ СПИСОК */
+        /* КРАСИВЫЙ ВЫПАДАЮЩИЙ СПИСОК – УЛУЧШЕННЫЙ ДИЗАЙН */
         .custom-select {
             position: relative;
-            display: inline-block;
+            display: inline-flex;
+            align-items: center;
             background: var(--select-bg);
             border-radius: 2rem;
             padding: 0.4rem 2rem 0.4rem 1rem;
@@ -143,21 +144,16 @@
             font-weight: 500;
             color: var(--select-color);
             cursor: pointer;
-            transition: 0.2s;
+            transition: all 0.2s ease;
             user-select: none;
-            border: none;
-            appearance: none;
-            -webkit-appearance: none;
-            background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23475669' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'></polyline></svg>");
-            background-repeat: no-repeat;
-            background-position: right 0.8rem center;
-            background-size: 1rem;
-        }
-        body.dark .custom-select {
-            background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'></polyline></svg>");
+            border: 1px solid transparent;
+            backdrop-filter: blur(4px);
+            min-width: 130px;
         }
         .custom-select:hover {
             background-color: var(--select-hover);
+            border-color: var(--border);
+            transform: translateY(-1px);
         }
         .custom-select select {
             opacity: 0;
@@ -172,6 +168,27 @@
         .select-text {
             display: inline-block;
             pointer-events: none;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 120px;
+        }
+        .custom-select::after {
+            content: '';
+            position: absolute;
+            right: 0.8rem;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 0;
+            height: 0;
+            border-left: 5px solid transparent;
+            border-right: 5px solid transparent;
+            border-top: 5px solid var(--select-color);
+            pointer-events: none;
+            opacity: 0.7;
+        }
+        body.dark .custom-select::after {
+            border-top-color: #f1f5f9;
         }
 
         textarea, .readonly-area {
@@ -432,11 +449,17 @@
                 width: 95%;
                 padding: 1.5rem;
             }
+            .custom-select {
+                min-width: 110px;
+            }
+            .select-text {
+                max-width: 100px;
+            }
         }
     </style>
 </head>
 <body>
-<div class="beta-watermark" id="betaWatermark">BETA 0.7.2</div>
+<div class="beta-watermark" id="betaWatermark">BETA 0.7.3</div>
 <div class="container">
     <div class="translate-panel">
         <div class="panel">
@@ -531,7 +554,7 @@
             <input type="checkbox" id="hideWatermarkCheckbox">
         </div>
         <div class="info-text">
-            Версия: BETA 0.7.2 (X.Y.Z)<br>
+            Версия: BETA 0.7.3 (X.Y.Z)<br>
             • X — глобальные изменения<br>
             • Y — новые функции<br>
             • Z — исправление багов<br>
@@ -543,7 +566,7 @@
 </div>
 
 <script>
-    // ======================= ОСНОВНЫЕ СЛОВАРИ И ФУНКЦИИ ПЕРЕВОДА (без изменений) =======================
+    // ======================= ОСНОВНЫЕ СЛОВАРИ И ФУНКЦИИ ПЕРЕВОДА =======================
     let rusToMell = new Map();
     let mellToRus = new Map();
     let rusToUsb = new Map();
@@ -793,7 +816,7 @@
         location.reload();
     });
     document.getElementById('showVersionBtn').addEventListener('click', () => {
-        alert('Текущая версия: BETA 0.7.2 (X.Y.Z)\n• X — глобальные изменения\n• Y — новые функции\n• Z — исправление багов\n\nАвтор: LITMati\nСайт: litmati.github.io/tiktok');
+        alert('Текущая версия: BETA 0.7.3 (X.Y.Z)\n• X — глобальные изменения\n• Y — новые функции\n• Z — исправление багов\n\nАвтор: LITMati\nСайт: litmati.github.io/tiktok');
         secretMenu.classList.remove('show');
     });
 
