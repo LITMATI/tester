@@ -20,6 +20,29 @@
             padding: 1rem;
             position: relative;
         }
+        /* Большая полупрозрачная надпись BETA (как раньше) */
+        .beta-watermark {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            pointer-events: none;
+            z-index: 1000;
+            font-family: monospace;
+            font-weight: bold;
+            font-size: clamp(3rem, 15vw, 12rem);
+            color: #000000;
+            opacity: 0.12;
+            white-space: nowrap;
+            transform: rotate(-15deg);
+            letter-spacing: 0.2em;
+            user-select: none;
+        }
+        /* Маленькая метка в левом углу (опционально) */
         .version-tag {
             position: fixed;
             top: 16px;
@@ -28,11 +51,10 @@
             font-size: 0.7rem;
             font-weight: 500;
             color: #000000;
-            opacity: 0.25;
+            opacity: 0.3;
             background: transparent;
             pointer-events: none;
-            z-index: 1000;
-            letter-spacing: 0.5px;
+            z-index: 1001;
         }
         .container {
             max-width: 1100px;
@@ -41,6 +63,8 @@
             border-radius: 2rem;
             box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
             overflow: hidden;
+            position: relative;
+            z-index: 2;
         }
         .translate-panel {
             display: flex;
@@ -170,16 +194,18 @@
             }
             .swap-btn {
                 margin: 0.5rem auto;
-                transform: rotate(90deg);
+                /* Убираем поворот на мобилках, как просил пользователь */
+                transform: none;
             }
             .swap-btn:hover {
-                transform: rotate(90deg) scale(1.02);
+                transform: scale(1.02);
             }
         }
     </style>
 </head>
 <body>
-<div class="version-tag">BETA 5.10</div>
+<div class="beta-watermark">BETA 6.0</div>
+<div class="version-tag">BETA 6.0</div>
 <div class="container">
     <div class="translate-panel">
         <!-- Левая панель -->
@@ -247,7 +273,7 @@
 </div>
 
 <script>
-    // === Версия увеличена до 5.10 ===
+    // === Версия 6.0 ===
     // Словари (заполняются из dictionary.json)
     let rusToMell = new Map();
     let mellToRus = new Map();
