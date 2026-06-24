@@ -415,7 +415,7 @@
             border: 1px solid var(--border);
             border-radius: 1rem;
             padding: 1rem;
-            width: 240px;
+            width: 220px;
             z-index: 1003;
             box-shadow: 0 4px 12px rgba(0,0,0,0.2);
             backdrop-filter: blur(8px);
@@ -546,7 +546,6 @@
 <div id="secretMenu" class="secret-menu">
     <button id="resetSettingsBtn">Сбросить настройки</button>
     <button id="showVersionBtn">Показать версию</button>
-    <button id="reloadDictBtn">⟳ Перезагрузить словарь</button>
 </div>
 
 <div id="settingsModal" class="modal">
@@ -575,6 +574,9 @@
         <div class="setting-group">
             <label>Скрыть водяной знак</label>
             <input type="checkbox" id="hideWatermarkCheckbox">
+        </div>
+        <div class="setting-group" style="justify-content: center; margin-top: 0.5rem;">
+            <button id="reloadDictBtn" style="background: var(--select-bg); border: none; padding: 0.5rem 1.2rem; border-radius: 2rem; font-size: 0.9rem; color: var(--select-color); cursor: pointer; transition: 0.2s;">⟳ Обновить словарь</button>
         </div>
         <div class="info-text">
             Версия: BETA 0.8.2<br>
@@ -775,7 +777,6 @@
             phraseRusToUsb.sort((a, b) => b[0].length - a[0].length);
             phraseUsbToRus.sort((a, b) => b[0].length - a[0].length);
             updateTranslation();
-            // Покажем уведомление
             showToast('Словарь обновлён');
         } catch (e) {
             console.error(e);
@@ -970,6 +971,7 @@
     const settingsIconElem = document.getElementById('settingsIcon');
     const closeModalBtn = document.getElementById('closeModalBtn');
     const secretMenu = document.getElementById('secretMenu');
+    const reloadDictBtn = document.getElementById('reloadDictBtn');
 
     let pressTimer = null;
     let isLongPress = false;
@@ -1031,7 +1033,7 @@
         }
     });
 
-    // === ОБРАБОТЧИКИ КНОПОК СЕКРЕТНОГО МЕНЮ ===
+    // === ОБРАБОТЧИКИ КНОПОК ===
     document.getElementById('resetSettingsBtn').addEventListener('click', () => {
         localStorage.clear();
         location.reload();
@@ -1040,13 +1042,14 @@
         alert('Текущая версия: BETA 0.8.2\nСуффиксы только для существительных.\nАвтор: LITMati\nСайт: litmati.github.io/tiktok');
         secretMenu.classList.remove('show');
     });
-    document.getElementById('reloadDictBtn').addEventListener('click', () => {
+
+    // Кнопка обновления словаря в настройках
+    reloadDictBtn.addEventListener('click', () => {
         loadDictionary();
-        secretMenu.classList.remove('show');
+        // не закрываем настройки, чтобы пользователь видел, что словарь обновлён
     });
 
     inputArea.value = 'мама покормить кота не переживай за собаку я с ней погулял';
-    // Загружаем словарь при старте
     loadDictionary();
 </script>
 </body>
